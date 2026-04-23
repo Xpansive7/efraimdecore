@@ -145,6 +145,7 @@ const refs = {
   panels: [...document.querySelectorAll("[data-view-panel]")],
   title: document.getElementById("view-title"),
   description: document.getElementById("view-description"),
+  mastheadDate: document.getElementById("masthead-date"),
   statusRibbon: document.getElementById("status-ribbon"),
   currentDateLabel: document.getElementById("current-date-label"),
   dashboardKpis: document.getElementById("dashboard-kpis"),
@@ -329,8 +330,11 @@ function persistAndRender(save = true) {
 }
 
 function renderAll() {
-  refs.currentDateLabel.textContent = formatLongDate(new Date());
+  const now = new Date();
+  if (refs.currentDateLabel) refs.currentDateLabel.textContent = formatLongDate(now);
+  if (refs.mastheadDate) refs.mastheadDate.textContent = formatLongDate(now);
   updateSelectors();
+  updateNavBadges();
   renderRibbon();
   renderDashboard();
   renderClients();
@@ -341,6 +345,22 @@ function renderAll() {
   renderBudgetLiveSummary();
   renderProjectLiveSummary();
   syncViewMeta();
+}
+
+function updateNavBadges() {
+  const setBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (count > 0) {
+      el.textContent = count;
+      el.hidden = false;
+    } else {
+      el.hidden = true;
+    }
+  };
+  setBadge("badge-clientes",   state.clients.length);
+  setBadge("badge-orcamentos", state.budgets.filter(b => b.status !== "aprovado").length);
+  setBadge("badge-projetos",   state.projects.filter(p => p.status !== "entregue").length);
 }
 
 function updateSelectors() {
@@ -437,7 +457,7 @@ function renderClients() {
   });
 
   if (!clients.length) {
-    refs.clientList.innerHTML = emptyState("Nenhum cliente encontrado.", "Cadastre um cliente novo ou ajuste a busca.");
+    refs.clientList.innerHTML = emptyState("Nenhum cliente encontrado.", "Preencha o formulario ao lado para cadastrar o primeiro.");
     return;
   }
 
@@ -481,6 +501,7 @@ function renderBudgets() {
     refs.budgetList.innerHTML = emptyState("Nenhum orcamento salvo.", "Preencha o formulario ao lado para criar o primeiro.");
     return;
   }
+
 
   refs.budgetList.innerHTML = state.budgets.map((budget) => {
     const client = getClientById(budget.clientId);
@@ -531,7 +552,7 @@ function renderBudgets() {
 
 function renderProjects() {
   if (!state.projects.length) {
-    refs.projectList.innerHTML = emptyState("Nenhum projeto salvo.", "Aprove um orcamento ou crie um projeto manual.");
+    refs.projectList.innerHTML = emptyState("Nenhum projeto salvo.", "Aprove um orcamento ou crie um projeto manual.", { view: "orcamentos", label: "Ver orcamentos" });
     return;
   }
 
@@ -606,7 +627,7 @@ function renderAgenda() {
           </article>
         `;
       }).join("")
-    : emptyState("Sem projetos na agenda.", "Crie ou aprove um projeto para montar a agenda.");
+    : emptyState("Sem projetos na agenda.", "Crie ou aprove um projeto para montar a agenda.", { view: "projetos", label: "Ir para projetos" });
 
   const alerts = upcoming.filter((project) => daysUntil(calcDeliveryDate(project.startDate, project.businessDays)) <= 3);
   refs.agendaAlerts.innerHTML = alerts.length
@@ -678,7 +699,7 @@ function renderFinance() {
           </div>
         </article>
       `).join("")
-    : emptyState("Sem dados financeiros ainda.", "Cadastre orcamentos e projetos para ver margem.");
+    : emptyState("Sem dados financeiros ainda.", "Cadastre orcamentos e projetos para ver margem.", { view: "orcamentos", label: "Novo orcamento" });
 }
 
 function renderBudgetLiveSummary() {
@@ -953,12 +974,16 @@ function renderMaterialList(materials) {
   `;
 }
 
-function emptyState(title, description) {
+function emptyState(title, description, cta) {
+  const ctaHtml = cta
+    ? `<button class="button ghost small" data-action="go-view" data-view="${cta.view}">${escapeHtml(cta.label)}</button>`
+    : "";
   return `
     <div class="empty-state">
       <p class="micro-label">Sem dados</p>
       <h3>${escapeHtml(title)}</h3>
       <p>${escapeHtml(description)}</p>
+      ${ctaHtml}
     </div>
   `;
 }
