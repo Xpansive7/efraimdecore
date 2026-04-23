@@ -687,7 +687,10 @@ function renderFinance() {
   ].sort((a, b) => b.margin - a.margin);
 
   refs.financeList.innerHTML = records.length
-    ? records.map((record) => `
+    ? records.map((record) => {
+        const tier = record.margin < 25 ? "critica" : record.margin < 35 ? "aceitavel" : record.margin < 45 ? "boa" : "excelente";
+        const barW = Math.min((record.margin / 60) * 100, 100);
+        return `
         <article class="record-card reveal-item">
           <div class="record-head">
             <div class="record-main">
@@ -697,22 +700,17 @@ function renderFinance() {
             <span class="status-pill ${record.margin < 25 ? "danger" : record.margin < 35 ? "warning" : "success"}">${formatPercent(record.margin)}</span>
           </div>
           <div class="record-stats">
-            <div class="record-stat">
-              <span>Valor</span>
-              <strong>${formatCurrency(record.revenue)}</strong>
-            </div>
-            <div class="record-stat">
-              <span>Custo</span>
-              <strong>${formatCurrency(record.cost)}</strong>
-            </div>
-            <div class="record-stat">
-              <span>Lucro</span>
-              <strong>${formatCurrency(record.revenue - record.cost)}</strong>
-            </div>
+            <div class="record-stat"><span>Valor</span><strong>${formatCurrency(record.revenue)}</strong></div>
+            <div class="record-stat"><span>Custo</span><strong>${formatCurrency(record.cost)}</strong></div>
+            <div class="record-stat"><span>Lucro</span><strong>${formatCurrency(record.revenue - record.cost)}</strong></div>
           </div>
-        </article>
-      `).join("")
-    : emptyState("Sem dados financeiros ainda.", "Cadastre orçamentos e projetos para ver margem.", { view: "orçamentos", label: "Novo orçamento" });
+          <div class="finance-bar-row">
+            <div class="finance-bar-track"><div class="finance-bar-fill ${tier}" style="width:${barW}%"></div></div>
+            <span class="finance-bar-hint">Margem ${formatPercent(record.margin)}</span>
+          </div>
+        </article>`;
+      }).join("")
+    : emptyState("Sem dados financeiros ainda.", "Cadastre orçamentos e projetos para ver margem.", { view: "orcamentos", label: "Novo orçamento" });
 }
 
 function renderBudgetLiveSummary() {
@@ -999,21 +997,37 @@ function renderHotBudgets(budgets) {
 }
 
 function renderFinancialHighlight(metrics) {
+  const projects = state.projects.slice(0, 4);
+  const maxVal   = projects.reduce((m, p) => Math.max(m, p.price), 1);
+
+  const chartRows = projects.length
+    ? projects.map((p) => {
+        const revW  = (p.price / maxVal) * 100;
+        const costW = (p.cost  / maxVal) * 100;
+        return `
+          <div class="chart-row">
+            <span class="chart-label">${escapeHtml(p.title)}</span>
+            <div class="chart-bars">
+              <div class="chart-bar-wrap"><div class="chart-bar revenue" style="width:${revW}%"></div></div>
+              <div class="chart-bar-wrap"><div class="chart-bar cost"    style="width:${costW}%"></div></div>
+            </div>
+            <span class="chart-val">${formatCurrency(p.price - p.cost)}</span>
+          </div>`;
+      }).join("")
+    : `<p class="muted" style="padding:8px 0">Nenhum projeto ainda.</p>`;
+
   return `
-    <div class="finance-card">
-      <p class="micro-label">Projetos</p>
-      <div class="finance-value">${formatCurrency(metrics.projectRevenue)}</div>
-      <p class="muted">Valor total em execução hoje.</p>
+    <div class="finance-chart">
+      <div class="finance-chart-legend">
+        <span class="legend-dot revenue"></span><span>Receita</span>
+        <span class="legend-dot cost"></span><span>Custo</span>
+      </div>
+      ${chartRows}
     </div>
-    <div class="finance-card">
-      <p class="micro-label">Custo</p>
-      <div class="finance-value">${formatCurrency(metrics.projectCost)}</div>
-      <p class="muted">Material e execução ja contabilizados.</p>
-    </div>
-    <div class="finance-card">
-      <p class="micro-label">Lucro</p>
-      <div class="finance-value">${formatCurrency(metrics.projectProfit)}</div>
-      <p class="muted">Margem média de ${formatPercent(metrics.averageProjectMargin)}.</p>
+    <div class="finance-totals">
+      <div class="finance-total-item"><span>Total em projetos</span><strong>${formatCurrency(metrics.projectRevenue)}</strong></div>
+      <div class="finance-total-item"><span>Lucro total</span><strong class="gold">${formatCurrency(metrics.projectProfit)}</strong></div>
+      <div class="finance-total-item"><span>Margem média</span><strong>${formatPercent(metrics.averageProjectMargin)}</strong></div>
     </div>
   `;
 }
