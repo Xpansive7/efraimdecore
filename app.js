@@ -2,28 +2,28 @@ const STORAGE_KEY = "efraim-dashboard-v1";
 
 const views = {
   dashboard: {
-    title: "Gerenciar cliente, orcamento, projeto e entrega sem perder prazo nem acabamento.",
-    description: "Visao geral do negocio com margem, agenda, entregas e memoria do cliente em um unico painel."
+    title: "Dashboard",
+    description: ""
   },
   clientes: {
-    title: "Cadastrar cliente e manter historico reutilizavel por obra.",
-    description: "Quando o cliente voltar meses depois, a ficha ja devolve ambiente, material, cor e contato."
+    title: "Clientes",
+    description: ""
   },
   orcamentos: {
-    title: "Montar orcamento com custo, lucro e prazo util calculado.",
-    description: "Tudo nasce aqui antes de virar projeto: proposta, materiais previstos, margem e status comercial."
+    title: "Orcamentos",
+    description: ""
   },
   projetos: {
-    title: "Operar projeto aprovado com entrega real, materiais e lucro.",
-    description: "Controle o que entrou em execucao, o que foi comprado e quanto realmente vai sobrar."
+    title: "Projetos",
+    description: ""
   },
   agenda: {
-    title: "Enxergar vencimentos e entregas antes do atraso acontecer.",
-    description: "Prazos uteis viram datas reais para voce saber o que vence hoje, nesta semana e o que esta atrasando."
+    title: "Agenda",
+    description: ""
   },
   financeiro: {
-    title: "Ver margem e caixa por projeto e por orcamento.",
-    description: "Resumo rapido do valor vendido, custo acumulado e rentabilidade do periodo."
+    title: "Financeiro",
+    description: ""
   }
 };
 
