@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Efraim Decore | Operacao</title>
+  <title>Efraim Decore | Dashboard Operacional</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Italiana&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -13,28 +13,28 @@
   <div class="background-mesh" aria-hidden="true"></div>
   <div class="app-shell">
     <aside class="rail">
-      <div class="brand">
+      <div class="brand reveal-item">
         <p class="brand-title">Efraim</p>
         <p class="brand-subtitle">Decore</p>
         <p class="brand-meta">Mobiliario planejado premium</p>
       </div>
 
-      <div class="rail-panel">
+      <div class="rail-panel reveal-item">
         <p class="micro-label">Navegacao</p>
         <nav class="menu">
-          <button class="menu-item active">Dashboard</button>
-          <button class="menu-item">Novo cliente</button>
-          <button class="menu-item">Orcamentos</button>
-          <button class="menu-item">Projetos</button>
-          <button class="menu-item">Agenda</button>
-          <button class="menu-item">Financeiro</button>
+          <button class="menu-item active" data-view="dashboard">Dashboard</button>
+          <button class="menu-item" data-view="clientes">Clientes</button>
+          <button class="menu-item" data-view="orcamentos">Orcamentos</button>
+          <button class="menu-item" data-view="projetos">Projetos</button>
+          <button class="menu-item" data-view="agenda">Agenda</button>
+          <button class="menu-item" data-view="financeiro">Financeiro</button>
         </nav>
       </div>
 
       <div class="rail-panel secondary reveal-item">
         <p class="micro-label">Leitura rapida</p>
-        <h3>Cliente, material, prazo e margem no mesmo lugar.</h3>
-        <p>Essa dashboard existe para eliminar retrabalho, papel solto e esquecimento de acabamento.</p>
+        <h3>Prazo, material, margem e memoria de obra em um lugar so.</h3>
+        <p>Cadastro rapido, fluxo de orcamento e historico do cliente prontos para nao depender mais de papel.</p>
       </div>
     </aside>
 
@@ -42,439 +42,422 @@
       <header class="masthead reveal-item">
         <div class="masthead-copy">
           <p class="micro-label">Centro de operacao</p>
-          <h1>Controlar cliente, orcamento, projeto e entrega com cara de estudio premium, nao de planilha feia.</h1>
+          <h1 id="view-title">Gerenciar cliente, orcamento, projeto e entrega sem perder prazo nem acabamento.</h1>
+          <p id="view-description" class="masthead-description">Tudo roda localmente no navegador com salvamento automatico e foco no dia a dia da marcenaria planejada.</p>
         </div>
 
         <div class="masthead-actions">
-          <button class="button ghost">Cadastrar cliente</button>
-          <button class="button solid">Criar orcamento</button>
+          <button class="button ghost" data-action="go-view" data-view="clientes">Novo cliente</button>
+          <button class="button solid" data-action="go-view" data-view="orcamentos">Novo orcamento</button>
         </div>
       </header>
 
-      <section class="ribbon reveal-item">
-        <div class="ribbon-item">
-          <span class="micro-label">Entrega mais proxima</span>
-          <strong>Adriana Mello · 26 abr</strong>
-        </div>
-        <div class="ribbon-item">
-          <span class="micro-label">Compra urgente</span>
-          <strong>Ferragem Hafele · hoje</strong>
-        </div>
-        <div class="ribbon-item">
-          <span class="micro-label">Orcamento quente</span>
-          <strong>Patricia Nunes · 39%</strong>
-        </div>
-        <div class="ribbon-item">
-          <span class="micro-label">Maior margem</span>
-          <strong>Closet casal · 34%</strong>
-        </div>
-      </section>
+      <section class="ribbon reveal-item" id="status-ribbon"></section>
 
-      <section class="hero-grid">
-        <article class="hero-panel reveal-item">
-          <div class="hero-top">
-            <div>
-              <p class="micro-label">Painel mestre</p>
-              <h2>O que precisa de decisao agora</h2>
-            </div>
-            <p class="hero-date">23 abr 2026</p>
-          </div>
-
-          <div class="kpi-grid">
-            <div class="kpi-card pulse-card">
-              <span class="kpi-label">Lucro previsto</span>
-              <strong>R$ 18.450</strong>
-              <small>4 projetos ativos</small>
-            </div>
-            <div class="kpi-card">
-              <span class="kpi-label">Orcamentos abertos</span>
-              <strong>7</strong>
-              <small>3 precisam de retorno</small>
-            </div>
-            <div class="kpi-card">
-              <span class="kpi-label">Entregas criticas</span>
-              <strong>3</strong>
-              <small>1 em risco real</small>
-            </div>
-          </div>
-
-          <div class="hero-signals">
-            <div class="signal-card">
-              <span class="signal-title">Hoje</span>
-              <p>Comprar ferragem da Adriana Mello e liberar corte do closet do Marcio.</p>
-            </div>
-            <div class="signal-card">
-              <span class="signal-title">Atraso</span>
-              <p>Projeto gourmet entra em risco se a chapa nao chegar ate amanha cedo.</p>
-            </div>
-            <div class="signal-card">
-              <span class="signal-title">Caixa</span>
-              <p>Dois orcamentos com margem boa ainda sem fechamento: closet e home office.</p>
-            </div>
-            <div class="signal-card">
-              <span class="signal-title">Memoria</span>
-              <p>O historico do cliente precisa devolver cor, chapa e ferragem sem depender de papel.</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="timeline-panel reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Agenda</p>
-              <h3>Prazos e entregas</h3>
-            </div>
-          </div>
-
-          <div class="timeline-list">
-            <div class="timeline-item">
-              <strong>Hoje</strong>
-              <p>Fechar compra da chapa Carvalho Hanover do projeto Marcio Prado.</p>
-            </div>
-            <div class="timeline-item">
-              <strong>25 abr</strong>
-              <p>Enviar revisao final do orcamento de Patricia Nunes.</p>
-            </div>
-            <div class="timeline-item danger">
-              <strong>26 abr</strong>
-              <p>Entrega Adriana Mello. Risco por ferragem pendente.</p>
-            </div>
-            <div class="timeline-item">
-              <strong>29 abr</strong>
-              <p>Montagem do closet casal do Recreio.</p>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <section class="board-grid">
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Fluxo</p>
-              <h3>Novo cliente -> Orcamento -> Projeto</h3>
-            </div>
-          </div>
-
-          <div class="flow-grid">
-            <div class="flow-card">
-              <span class="flow-index">01</span>
-              <h4>Novo cliente</h4>
-              <p>Contato, endereco, ambiente, origem e referencias.</p>
-            </div>
-            <div class="flow-card">
-              <span class="flow-index">02</span>
-              <h4>Orcamento</h4>
-              <p>Materiais previstos, valor proposto, prazo e lucro estimado.</p>
-            </div>
-            <div class="flow-card">
-              <span class="flow-index">03</span>
-              <h4>Projeto</h4>
-              <p>Pega custo real, materiais usados, prazo util e data de entrega.</p>
-            </div>
-          </div>
-        </article>
-
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Acao rapida</p>
-              <h3>Novo cliente</h3>
-            </div>
-          </div>
-
-          <form class="quick-form">
-            <label>
-              <span>Nome do cliente</span>
-              <input type="text" value="Patricia Nunes" />
-            </label>
-            <label>
-              <span>Telefone</span>
-              <input type="text" value="(21) 99887-2114" />
-            </label>
-            <label>
-              <span>Endereco</span>
-              <input type="text" value="Rua Jornalista Ricardo, Barra" />
-            </label>
-            <label>
-              <span>Ambiente</span>
-              <input type="text" value="Home office" />
-            </label>
-            <button type="button" class="button solid wide">Salvar cliente</button>
-          </form>
-        </article>
-      </section>
-
-      <section class="projects-section reveal-item">
-        <div class="section-head">
-          <div>
-            <p class="micro-label">Projetos vivos</p>
-            <h2>Operacao por projeto, nao por papel solto</h2>
-          </div>
-          <button class="button ghost small">Ver todos</button>
-        </div>
-
-        <div class="project-grid">
-          <article class="project-card featured">
-            <div class="project-top">
-              <span class="project-city">Barra da Tijuca</span>
-              <span class="chip warning">Material pendente</span>
-            </div>
-            <h3>Adriana Mello</h3>
-            <p class="project-type">Cozinha gourmet + ilha</p>
-
-            <div class="metric-grid">
+      <section class="view-section active" data-view-panel="dashboard">
+        <section class="hero-grid">
+          <article class="hero-panel reveal-item">
+            <div class="hero-top">
               <div>
-                <small>Valor fechado</small>
-                <strong>R$ 17.500</strong>
+                <p class="micro-label">Painel mestre</p>
+                <h2>O que precisa de atencao agora</h2>
               </div>
+              <p class="hero-date" id="current-date-label"></p>
+            </div>
+
+            <div class="kpi-grid" id="dashboard-kpis"></div>
+
+            <div class="hero-signals" id="hero-signals"></div>
+          </article>
+
+          <article class="timeline-panel reveal-item">
+            <div class="panel-head">
               <div>
-                <small>Custo atual</small>
-                <strong>R$ 11.200</strong>
-              </div>
-              <div>
-                <small>Lucro previsto</small>
-                <strong>R$ 6.300</strong>
+                <p class="micro-label">Agenda</p>
+                <h3>Prazos e entregas</h3>
               </div>
             </div>
 
-            <div class="project-band">
-              <span>Inicio 02 abr</span>
-              <span>30 dias uteis</span>
-              <span>Entrega 26 abr</span>
+            <div class="timeline-list" id="agenda-timeline"></div>
+          </article>
+        </section>
+
+        <section class="board-grid">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Fluxo real</p>
+                <h3>Novo cliente -> Orcamento -> Projeto -> Entrega</h3>
+              </div>
+            </div>
+
+            <div class="flow-grid">
+              <div class="flow-card">
+                <span class="flow-index">01</span>
+                <h4>Cliente</h4>
+                <p>Nome, telefone, endereco, origem, ambiente e observacoes ficam registrados.</p>
+              </div>
+              <div class="flow-card">
+                <span class="flow-index">02</span>
+                <h4>Orcamento</h4>
+                <p>Valor proposto, custo previsto, prazo util, materiais e margem esperada.</p>
+              </div>
+              <div class="flow-card">
+                <span class="flow-index">03</span>
+                <h4>Projeto</h4>
+                <p>Transforma o orcamento aprovado em execucao com custo real e data calculada.</p>
+              </div>
             </div>
           </article>
 
-          <article class="project-card">
-            <div class="project-top">
-              <span class="project-city">Recreio</span>
-              <span class="chip">Em producao</span>
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Atalhos</p>
+                <h3>Acoes rapidas</h3>
+              </div>
             </div>
-            <h3>Marcio Prado</h3>
-            <p class="project-type">Closet casal</p>
 
-            <div class="project-line">
-              <span>Lucro previsto</span>
-              <strong>R$ 4.980</strong>
+            <div class="action-stack">
+              <button class="button solid wide" data-action="go-view" data-view="clientes">Cadastrar cliente</button>
+              <button class="button ghost wide" data-action="go-view" data-view="orcamentos">Montar orcamento</button>
+              <button class="button ghost wide" data-action="go-view" data-view="projetos">Ver projetos</button>
             </div>
-            <div class="project-line">
-              <span>Entrega</span>
-              <strong>29 abr</strong>
+
+            <div class="mini-summary" id="dashboard-summary"></div>
+          </article>
+        </section>
+
+        <section class="projects-section reveal-item">
+          <div class="section-head">
+            <div>
+              <p class="micro-label">Projetos vivos</p>
+              <h2>Operacao organizada por cliente e obra</h2>
             </div>
-            <div class="project-line">
-              <span>Etapa atual</span>
-              <strong>Corte liberado</strong>
+            <button class="button ghost small" data-action="go-view" data-view="projetos">Abrir tela completa</button>
+          </div>
+
+          <div class="project-grid" id="dashboard-project-grid"></div>
+        </section>
+
+        <section class="detail-grid">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Cliente em destaque</p>
+                <h3>Memoria que salva retrabalho</h3>
+              </div>
             </div>
+            <div id="featured-client-card"></div>
           </article>
 
-          <article class="project-card">
-            <div class="project-top">
-              <span class="project-city">Tijuca</span>
-              <span class="chip muted">Montagem</span>
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Orcamentos quentes</p>
+                <h3>Fila comercial</h3>
+              </div>
             </div>
-            <h3>Luciana Costa</h3>
-            <p class="project-type">Painel TV + buffet</p>
-
-            <div class="project-line">
-              <span>Lucro previsto</span>
-              <strong>R$ 3.150</strong>
-            </div>
-            <div class="project-line">
-              <span>Entrega</span>
-              <strong>03 mai</strong>
-            </div>
-            <div class="project-line">
-              <span>Etapa atual</span>
-              <strong>Montagem agendada</strong>
-            </div>
+            <div id="hot-budgets"></div>
           </article>
-        </div>
+
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Financeiro</p>
+                <h3>Margem do periodo</h3>
+              </div>
+            </div>
+            <div id="financial-highlight"></div>
+          </article>
+        </section>
       </section>
 
-      <section class="ops-grid">
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Orcamentos em curso</p>
-              <h3>Fila comercial</h3>
+      <section class="view-section" data-view-panel="clientes">
+        <section class="board-grid board-grid-wide">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Cadastro</p>
+                <h3>Novo cliente</h3>
+              </div>
             </div>
-          </div>
 
-          <div class="lite-table">
-            <div class="lite-row head">
-              <span>Cliente</span>
-              <span>Ambiente</span>
-              <span>Status</span>
-              <span>Margem</span>
-            </div>
-            <div class="lite-row">
-              <span>Patricia Nunes</span>
-              <span>Home office</span>
-              <span class="row-tag">Revisao final</span>
-              <span>39%</span>
-            </div>
-            <div class="lite-row">
-              <span>Rafael Siqueira</span>
-              <span>Closet solteiro</span>
-              <span class="row-tag muted">Enviado</span>
-              <span>28%</span>
-            </div>
-            <div class="lite-row">
-              <span>Bianca Furtado</span>
-              <span>Cozinha linear</span>
-              <span class="row-tag warm">Negociacao</span>
-              <span>31%</span>
-            </div>
-          </div>
-        </article>
+            <form id="client-form" class="stack-form">
+              <div class="form-grid form-grid-two">
+                <label>
+                  <span>Nome</span>
+                  <input name="name" type="text" required />
+                </label>
+                <label>
+                  <span>Telefone</span>
+                  <input name="phone" type="text" required />
+                </label>
+                <label>
+                  <span>Endereco</span>
+                  <input name="address" type="text" />
+                </label>
+                <label>
+                  <span>Origem</span>
+                  <input name="origin" type="text" placeholder="Indicacao, Instagram, trafego..." />
+                </label>
+                <label>
+                  <span>Ambiente inicial</span>
+                  <input name="environment" type="text" placeholder="Cozinha, closet, home office..." />
+                </label>
+                <label>
+                  <span>Referencia / cidade</span>
+                  <input name="city" type="text" />
+                </label>
+              </div>
 
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Financeiro rapido</p>
-              <h3>Resumo de margem</h3>
-            </div>
-          </div>
+              <label>
+                <span>Observacoes</span>
+                <textarea name="notes" rows="4" placeholder="Detalhes importantes do cliente, acabamento desejado, restricoes..."></textarea>
+              </label>
 
-          <div class="finance-list">
-            <div class="finance-line">
-              <span>Valor fechado no mes</span>
-              <strong>R$ 42.600</strong>
+              <div class="form-actions">
+                <button class="button solid" type="submit">Salvar cliente</button>
+                <button class="button ghost" type="reset">Limpar</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Base viva</p>
+                <h3>Clientes cadastrados</h3>
+              </div>
             </div>
-            <div class="finance-line">
-              <span>Custo acumulado</span>
-              <strong>R$ 26.940</strong>
+
+            <div class="toolbar">
+              <input id="client-search" class="search-input" type="search" placeholder="Buscar cliente, telefone, ambiente..." />
             </div>
-            <div class="finance-line highlight">
-              <span>Lucro previsto</span>
-              <strong>R$ 15.660</strong>
-            </div>
-            <div class="finance-line">
-              <span>Margem media</span>
-              <strong>36,7%</strong>
-            </div>
-          </div>
-        </article>
+
+            <div id="client-list" class="list-stack"></div>
+          </article>
+        </section>
       </section>
 
-      <section class="detail-grid">
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Ficha do cliente</p>
-              <h3>Historico que salva retrabalho</h3>
+      <section class="view-section" data-view-panel="orcamentos">
+        <section class="board-grid board-grid-wide">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Comercial</p>
+                <h3>Novo orcamento</h3>
+              </div>
             </div>
-            <button class="button ghost small">Abrir ficha completa</button>
-          </div>
 
-          <div class="dossier-top">
-            <div>
-              <h4>Adriana Mello</h4>
-              <p>Cliente recorrente. Voltou para ampliar a cozinha gourmet 8 meses depois da ultima entrega.</p>
-            </div>
-            <div class="contact-box">
-              <span>(21) 99999-2211</span>
-              <span>Indicacao</span>
-            </div>
-          </div>
+            <form id="budget-form" class="stack-form">
+              <div class="form-grid form-grid-two">
+                <label>
+                  <span>Cliente</span>
+                  <select name="clientId" id="budget-client-select" required></select>
+                </label>
+                <label>
+                  <span>Ambiente</span>
+                  <input name="title" type="text" required />
+                </label>
+                <label>
+                  <span>Valor proposto</span>
+                  <input name="price" type="number" min="0" step="0.01" required />
+                </label>
+                <label>
+                  <span>Custo estimado</span>
+                  <input name="cost" type="number" min="0" step="0.01" required />
+                </label>
+                <label>
+                  <span>Prazo em dias uteis</span>
+                  <input name="businessDays" type="number" min="1" step="1" required />
+                </label>
+                <label>
+                  <span>Status</span>
+                  <select name="status">
+                    <option value="rascunho">Rascunho</option>
+                    <option value="enviado">Enviado</option>
+                    <option value="negociacao">Negociacao</option>
+                    <option value="aprovado">Aprovado</option>
+                  </select>
+                </label>
+              </div>
 
-          <div class="dossier-grid">
-            <div class="mini-card">
-              <span class="micro-label">Cor usada</span>
-              <strong>Cinza cristal</strong>
-              <small>MDF BP 18mm</small>
-            </div>
-            <div class="mini-card">
-              <span class="micro-label">Ferragem</span>
-              <strong>Hafele</strong>
-              <small>Amortecedor + corredica invisivel</small>
-            </div>
-            <div class="mini-card">
-              <span class="micro-label">Puxador</span>
-              <strong>Cava champagne</strong>
-              <small>Ultima obra entregue em ago 2025</small>
-            </div>
-            <div class="mini-card">
-              <span class="micro-label">Lucro ultimo</span>
-              <strong>R$ 5.420</strong>
-              <small>Margem 31%</small>
-            </div>
-          </div>
-        </article>
+              <label>
+                <span>Descricao / escopo</span>
+                <textarea name="description" rows="3" placeholder="Resumo da proposta, diferenciais, detalhes do ambiente..."></textarea>
+              </label>
 
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Orcamento</p>
-              <h3>Compositor rapido</h3>
-            </div>
-          </div>
+              <label>
+                <span>Materiais previstos</span>
+                <textarea name="materials" rows="4" placeholder="Uma linha por item. Ex: MDF Cinza Cristal | fornecedor | qtd | valor | observacao"></textarea>
+              </label>
 
-          <div class="estimate-list">
-            <div class="estimate-line">
-              <span>Cliente</span>
-              <strong>Patricia Nunes</strong>
-            </div>
-            <div class="estimate-line">
-              <span>Ambiente</span>
-              <strong>Home office</strong>
-            </div>
-            <div class="estimate-line">
-              <span>Valor proposto</span>
-              <strong>R$ 9.800</strong>
-            </div>
-            <div class="estimate-line">
-              <span>Custo estimado</span>
-              <strong>R$ 5.900</strong>
-            </div>
-            <div class="estimate-line highlight">
-              <span>Lucro estimado</span>
-              <strong>R$ 3.900</strong>
-            </div>
-            <div class="estimate-line">
-              <span>Prazo inicial</span>
-              <strong>22 dias uteis</strong>
-            </div>
-          </div>
-        </article>
+              <div class="inline-summary" id="budget-live-summary"></div>
 
-        <article class="board reveal-item">
-          <div class="panel-head">
-            <div>
-              <p class="micro-label">Materiais do projeto</p>
-              <h3>Memoria de obra</h3>
-            </div>
-          </div>
+              <div class="form-actions">
+                <button class="button solid" type="submit">Salvar orcamento</button>
+                <button class="button ghost" type="reset">Limpar</button>
+              </div>
+            </form>
+          </article>
 
-          <div class="materials-list">
-            <div class="material-line">
-              <strong>Chapa principal</strong>
-              <span>Cinza cristal · 3 folhas · R$ 1.980</span>
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Pipeline</p>
+                <h3>Orcamentos</h3>
+              </div>
             </div>
-            <div class="material-line">
-              <strong>Ferragem</strong>
-              <span>Corredica invisivel + amortecedor · R$ 740</span>
-            </div>
-            <div class="material-line">
-              <strong>Puxador</strong>
-              <span>Cava champagne · R$ 380</span>
-            </div>
-            <div class="material-line">
-              <strong>Observacao</strong>
-              <span>Mesmo tom usado no gourmet anterior da cliente.</span>
-            </div>
-          </div>
 
-          <div class="tags">
-            <span>MDF BP 18mm</span>
-            <span>Cinza cristal</span>
-            <span>Hafele</span>
-            <span>Cava champagne</span>
-          </div>
-        </article>
+            <div id="budget-list" class="list-stack"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="view-section" data-view-panel="projetos">
+        <section class="board-grid board-grid-wide">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Execucao</p>
+                <h3>Novo projeto manual</h3>
+              </div>
+            </div>
+
+            <form id="project-form" class="stack-form">
+              <div class="form-grid form-grid-two">
+                <label>
+                  <span>Cliente</span>
+                  <select name="clientId" id="project-client-select" required></select>
+                </label>
+                <label>
+                  <span>Projeto / ambiente</span>
+                  <input name="title" type="text" required />
+                </label>
+                <label>
+                  <span>Valor fechado</span>
+                  <input name="price" type="number" min="0" step="0.01" required />
+                </label>
+                <label>
+                  <span>Custo real</span>
+                  <input name="cost" type="number" min="0" step="0.01" required />
+                </label>
+                <label>
+                  <span>Data de inicio</span>
+                  <input name="startDate" type="date" required />
+                </label>
+                <label>
+                  <span>Prazo em dias uteis</span>
+                  <input name="businessDays" type="number" min="1" step="1" required />
+                </label>
+                <label>
+                  <span>Status</span>
+                  <select name="status">
+                    <option value="aguardando">Aguardando</option>
+                    <option value="comprando material">Comprando material</option>
+                    <option value="em producao">Em producao</option>
+                    <option value="montagem">Montagem</option>
+                    <option value="entregue">Entregue</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Origem do projeto</span>
+                  <select name="sourceBudgetId" id="project-source-budget">
+                    <option value="">Criacao manual</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                <span>Materiais do projeto</span>
+                <textarea name="materials" rows="4" placeholder="Uma linha por item. Ex: Ferragem Hafele | loja X | 1 kit | 740 | amortecedor"></textarea>
+              </label>
+
+              <label>
+                <span>Observacoes</span>
+                <textarea name="notes" rows="3" placeholder="Pendencias, observacoes de montagem, cuidado com cor, ferragem, etc."></textarea>
+              </label>
+
+              <div class="inline-summary" id="project-live-summary"></div>
+
+              <div class="form-actions">
+                <button class="button solid" type="submit">Salvar projeto</button>
+                <button class="button ghost" type="reset">Limpar</button>
+              </div>
+            </form>
+          </article>
+
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Operacao</p>
+                <h3>Projetos ativos</h3>
+              </div>
+            </div>
+
+            <div id="project-list" class="list-stack"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="view-section" data-view-panel="agenda">
+        <section class="board-grid board-grid-wide">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Agenda operacional</p>
+                <h3>Entregas e vencimentos</h3>
+              </div>
+            </div>
+            <div id="agenda-list" class="list-stack"></div>
+          </article>
+
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Alerta</p>
+                <h3>Itens que merecem atencao</h3>
+              </div>
+            </div>
+            <div id="agenda-alerts" class="list-stack"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="view-section" data-view-panel="financeiro">
+        <section class="board-grid board-grid-wide">
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Margem</p>
+                <h3>Resumo financeiro</h3>
+              </div>
+            </div>
+            <div id="finance-summary" class="finance-card-grid"></div>
+          </article>
+
+          <article class="board reveal-item">
+            <div class="panel-head">
+              <div>
+                <p class="micro-label">Rentabilidade</p>
+                <h3>Projetos e orcamentos</h3>
+              </div>
+            </div>
+            <div id="finance-list" class="list-stack"></div>
+          </article>
+        </section>
       </section>
     </main>
   </div>
+
+  <template id="empty-state-template">
+    <div class="empty-state">
+      <p class="micro-label">Sem dados</p>
+      <h3>Nada por aqui ainda.</h3>
+      <p></p>
+    </div>
+  </template>
 
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
