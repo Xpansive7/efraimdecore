@@ -183,6 +183,10 @@ function bindEvents() {
     item.addEventListener("click", () => setView(item.dataset.view));
   });
 
+  document.querySelectorAll(".mobile-nav-item").forEach((item) => {
+    item.addEventListener("click", () => setView(item.dataset.view));
+  });
+
   document.querySelectorAll("[data-action='go-view']").forEach((button) => {
     button.addEventListener("click", () => setView(button.dataset.view));
   });
@@ -732,6 +736,10 @@ function setView(view) {
   currentView = view;
 
   refs.menuItems.forEach((item) => {
+    item.classList.toggle("active", item.dataset.view === view);
+  });
+
+  document.querySelectorAll(".mobile-nav-item").forEach((item) => {
     item.classList.toggle("active", item.dataset.view === view);
   });
 
