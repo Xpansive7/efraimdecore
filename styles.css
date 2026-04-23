@@ -2,12 +2,12 @@
    DESIGN TOKENS
 ───────────────────────────────────────────────────────── */
 :root {
-  /* backgrounds – 5 níveis */
-  --bg:    #07070a;
-  --bg-2:  #0c0c10;
-  --bg-3:  #111116;
-  --bg-4:  #17171d;
-  --bg-5:  #1d1d25;
+  /* backgrounds – 5 níveis (preto quente, sem azul) */
+  --bg:    #090907;
+  --bg-2:  #0d0d0b;
+  --bg-3:  #111110;
+  --bg-4:  #171714;
+  --bg-5:  #1e1e1b;
 
   /* gold */
   --gold:     #c4a44a;
@@ -58,7 +58,7 @@ html, body {
   background: var(--bg);
   color: var(--t1);
   font-family: var(--sans);
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -150,9 +150,9 @@ svg { display: block; }
 
 /* ── Micro label ── */
 .micro-label {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 0.56rem; font-weight: 600;
-  letter-spacing: .24em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 0.64rem; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase;
   color: var(--gold);
 }
 .micro-label::before {
@@ -168,14 +168,14 @@ svg { display: block; }
 .menu-item {
   position: relative;
   display: flex; align-items: center; gap: 9px;
-  padding: 9px 11px;
+  padding: 10px 12px;
   border: 1px solid transparent; border-radius: 8px;
   background: transparent;
   color: var(--t2);
   text-align: left;
   font-family: var(--cond);
-  font-size: 0.78rem; font-weight: 500;
-  letter-spacing: .08em; text-transform: uppercase;
+  font-size: 0.85rem; font-weight: 500;
+  letter-spacing: .07em; text-transform: uppercase;
   cursor: pointer;
   transition: color .14s, background .14s, border-color .14s;
 }
@@ -299,7 +299,7 @@ svg { display: block; }
 .ribbon-item strong {
   display: block; margin-top: 5px;
   font-family: var(--cond);
-  font-size: 0.85rem; font-weight: 600;
+  font-size: 0.92rem; font-weight: 600;
   letter-spacing: .04em; text-transform: uppercase;
   color: var(--t1);
 }
@@ -396,14 +396,14 @@ svg { display: block; }
 .kpi-card:hover { border-color: var(--gold-dim); transform: translateY(-2px); }
 .kpi-card:hover::after { opacity: 1; }
 .kpi-card small {
-  font-size: 0.57rem; letter-spacing: .18em;
+  font-size: 0.66rem; letter-spacing: .16em;
   text-transform: uppercase; color: var(--t2);
 }
 .kpi-card strong {
   display: block;
   font-family: var(--serif);
-  font-size: 1.85rem; font-weight: 400;
-  color: var(--gold); line-height: 1; margin-top: 7px;
+  font-size: 2.1rem; font-weight: 400;
+  color: var(--gold); line-height: 1; margin-top: 8px;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -423,11 +423,11 @@ svg { display: block; }
 .signal-title {
   display: block;
   font-family: var(--cond);
-  font-size: 0.66rem; font-weight: 600;
+  font-size: 0.72rem; font-weight: 600;
   text-transform: uppercase; letter-spacing: .1em;
-  color: var(--gold); margin-bottom: 4px;
+  color: var(--gold); margin-bottom: 5px;
 }
-.signal-card p { font-size: 0.76rem; color: var(--t3); line-height: 1.52; }
+.signal-card p { font-size: 0.84rem; color: var(--t3); line-height: 1.55; }
 
 /* ─────────────────────────────────────────────────────────
    TIMELINE
@@ -442,11 +442,11 @@ svg { display: block; }
 .timeline-item strong {
   display: block;
   font-family: var(--cond);
-  font-size: 0.7rem; font-weight: 600;
+  font-size: 0.78rem; font-weight: 600;
   text-transform: uppercase; letter-spacing: .08em;
   color: var(--t2); margin-bottom: 2px;
 }
-.timeline-item p { font-size: 0.76rem; color: var(--t3); }
+.timeline-item p { font-size: 0.84rem; color: var(--t3); }
 .timeline-item.danger  strong { color: var(--err);  }
 .timeline-item.warning strong { color: var(--warn); }
 
@@ -486,7 +486,7 @@ svg { display: block; }
 }
 .summary-box:last-child  { border-bottom: none; padding-bottom: 0; }
 .summary-box:first-child { padding-top: 0; }
-.muted { font-size: 0.74rem; color: var(--t3); }
+.muted { font-size: 0.82rem; color: var(--t3); }
 .summary-number {
   font-family: var(--serif);
   font-size: 1.3rem; font-weight: 400; color: var(--gold);
@@ -563,9 +563,9 @@ svg { display: block; }
 }
 .record-main h4 {
   font-family: var(--serif);
-  font-size: 1.2rem; font-weight: 400; color: var(--t1);
+  font-size: 1.3rem; font-weight: 400; color: var(--t1);
 }
-.record-meta { font-size: 0.73rem; color: var(--t3); margin-top: 2px; }
+.record-meta { font-size: 0.82rem; color: var(--t3); margin-top: 3px; }
 .record-head { align-items: flex-start; }
 .record-stats, .meta-grid {
   display: grid; grid-template-columns: repeat(3,1fr); gap: 6px;
@@ -576,12 +576,12 @@ svg { display: block; }
   background: rgba(255,255,255,.012);
 }
 .record-stat span, .meta-pair span:first-child {
-  display: block; font-size: 0.55rem;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--t3);
+  display: block; font-size: 0.63rem;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--t3);
 }
-.record-stat strong { display: block; margin-top: 3px; font-size: 0.86rem; font-weight: 600; color: var(--t1); }
-.meta-pair span:last-child { display: block; margin-top: 3px; font-size: 0.76rem; color: var(--t2); }
-.field-note { font-size: 0.74rem; color: var(--t3); line-height: 1.55; }
+.record-stat strong { display: block; margin-top: 3px; font-size: 0.92rem; font-weight: 600; color: var(--t1); }
+.meta-pair span:last-child { display: block; margin-top: 3px; font-size: 0.84rem; color: var(--t2); }
+.field-note { font-size: 0.82rem; color: var(--t3); line-height: 1.55; }
 
 /* ─────────────────────────────────────────────────────────
    STATUS PILLS / CHIPS
@@ -643,7 +643,7 @@ svg { display: block; }
 .form-grid-two { grid-template-columns: repeat(2,1fr); }
 .stack-form label { display: grid; gap: 5px; }
 .stack-form > label > span {
-  font-size: 0.57rem; letter-spacing: .18em;
+  font-size: 0.66rem; letter-spacing: .15em;
   text-transform: uppercase; color: var(--t2);
 }
 .stack-form input,
