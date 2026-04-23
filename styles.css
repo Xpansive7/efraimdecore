@@ -753,6 +753,86 @@ svg { display: block; }
 ::selection { background: var(--gold-dim); color: var(--t1); }
 .reveal-item { opacity: 1; transform: none; }
 
+/* ─── Calculadora de margem ───────────────────────────────── */
+.margin-calc {
+  padding: 16px;
+  border: 1px solid var(--b1);
+  border-radius: var(--rs);
+  background: rgba(255,255,255,.02);
+  display: grid;
+  gap: 12px;
+}
+.margin-calc-values {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.margin-calc-item {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.margin-calc-item span {
+  font-size: 0.66rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--t3); font-weight: 500;
+}
+.margin-calc-item strong {
+  font-size: 1.05rem; font-weight: 700; color: var(--t1);
+}
+.margin-calc-item strong.gold { color: var(--gold); }
+.margin-bar-row {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.margin-bar-header {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.margin-bar-label {
+  font-size: 0.72rem; font-weight: 600;
+}
+.margin-bar-label.critica  { color: var(--err);  }
+.margin-bar-label.aceitavel{ color: var(--warn); }
+.margin-bar-label.boa      { color: #8ab86e;     }
+.margin-bar-label.excelente{ color: var(--gold); }
+.margin-bar-pct {
+  font-family: var(--serif);
+  font-size: 1.5rem; font-weight: 400; line-height: 1;
+}
+.margin-bar-pct.critica  { color: var(--err);  }
+.margin-bar-pct.aceitavel{ color: var(--warn); }
+.margin-bar-pct.boa      { color: #8ab86e;     }
+.margin-bar-pct.excelente{ color: var(--gold); }
+.margin-bar-track {
+  height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,.08);
+  overflow: hidden;
+}
+.margin-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width .5s cubic-bezier(.34,1.1,.64,1), background .4s;
+}
+.margin-bar-fill.critica  { background: var(--err);  }
+.margin-bar-fill.aceitavel{ background: var(--warn); }
+.margin-bar-fill.boa      { background: #8ab86e;     }
+.margin-bar-fill.excelente{ background: var(--gold); }
+.margin-bar-hint {
+  font-size: 0.7rem; color: var(--t3);
+}
+
+/* ─── Cliente inline no orçamento ──────────────────────── */
+.client-select-row {
+  display: flex; gap: 8px; align-items: stretch;
+}
+.client-select-row select { flex: 1; }
+.new-client-inline {
+  padding: 14px 16px;
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--rs);
+  background: rgba(196,164,74,.04);
+}
+.new-client-inline-label {
+  font-size: 0.7rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px;
+}
+
 /* ─────────────────────────────────────────────────────────
    MOBILE BOTTOM NAV
 ───────────────────────────────────────────────────────── */

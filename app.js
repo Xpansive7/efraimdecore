@@ -1,30 +1,12 @@
 const STORAGE_KEY = "efraim-dashboard-v1";
 
 const views = {
-  dashboard: {
-    title: "Dashboard",
-    description: ""
-  },
-  clientes: {
-    title: "Clientes",
-    description: ""
-  },
-  orcamentos: {
-    title: "Orcamentos",
-    description: ""
-  },
-  projetos: {
-    title: "Projetos",
-    description: ""
-  },
-  agenda: {
-    title: "Agenda",
-    description: ""
-  },
-  financeiro: {
-    title: "Financeiro",
-    description: ""
-  }
+  dashboard:  { title: "Dashboard",    description: "" },
+  clientes:   { title: "Clientes",     description: "" },
+  orçamentos: { title: "Orçamentos",   description: "" },
+  projetos:   { title: "Projetos",     description: "" },
+  agenda:     { title: "Agenda",       description: "" },
+  financeiro: { title: "Financeiro",   description: "" }
 };
 
 const statusTone = {
@@ -70,7 +52,7 @@ const defaultState = {
       origin: "Trafego pago",
       environment: "Home office",
       city: "Rio de Janeiro",
-      notes: "Lead quente. Em fase final de orcamento."
+      notes: "Lead quente. Em fase final de orçamento."
     }
   ],
   budgets: [],
@@ -196,6 +178,17 @@ function bindEvents() {
   refs.projectForm.addEventListener("submit", handleProjectSubmit);
   refs.clientSearch.addEventListener("input", renderClients);
 
+  const toggleNewClientBtn = document.getElementById("budget-toggle-new-client");
+  const newClientFields    = document.getElementById("budget-new-client-fields");
+  if (toggleNewClientBtn && newClientFields) {
+    toggleNewClientBtn.addEventListener("click", () => {
+      const isHidden = newClientFields.hidden;
+      newClientFields.hidden = !isHidden;
+      toggleNewClientBtn.textContent = isHidden ? "Cancelar" : "+ Novo";
+      if (isHidden) document.getElementById("new-client-name").focus();
+    });
+  }
+
   refs.budgetForm.addEventListener("input", renderBudgetLiveSummary);
   refs.projectForm.addEventListener("input", renderProjectLiveSummary);
 
@@ -231,26 +224,42 @@ function handleBudgetSubmit(event) {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
 
+  const newClientFields = document.getElementById("budget-new-client-fields");
+  const newClientName   = document.getElementById("new-client-name");
+  const newClientPhone  = document.getElementById("new-client-phone");
+  let clientId = String(formData.get("clientId") || "");
+
+  if (newClientFields && !newClientFields.hidden) {
+    const name  = newClientName?.value.trim()  || "";
+    const phone = newClientPhone?.value.trim() || "";
+    if (name && phone) {
+      const newClient = { id: crypto.randomUUID(), name, phone, address: "", origin: "", environment: "", city: "", notes: "" };
+      state.clients.unshift(newClient);
+      clientId = newClient.id;
+    }
+  }
+
   const budget = {
     id: crypto.randomUUID(),
-    clientId: String(formData.get("clientId") || ""),
-    title: String(formData.get("title") || "").trim(),
-    price: Number(formData.get("price") || 0),
-    cost: Number(formData.get("cost") || 0),
+    clientId,
+    title:        String(formData.get("title") || "").trim(),
+    price:        Number(formData.get("price") || 0),
+    cost:         Number(formData.get("cost")  || 0),
     businessDays: Number(formData.get("businessDays") || 0),
-    status: String(formData.get("status") || "rascunho"),
-    description: String(formData.get("description") || "").trim(),
-    materials: parseMaterialsText(String(formData.get("materials") || "")),
-    createdAt: todayISO()
+    status:       String(formData.get("status") || "rascunho"),
+    description:  String(formData.get("description") || "").trim(),
+    materials:    parseMaterialsText(String(formData.get("materials") || "")),
+    createdAt:    todayISO()
   };
 
-  if (!budget.clientId || !budget.title) {
-    return;
-  }
+  if (!budget.clientId || !budget.title) return;
 
   state.budgets.unshift(budget);
   persistAndRender();
   event.currentTarget.reset();
+  if (newClientFields) { newClientFields.hidden = true; }
+  const btn = document.getElementById("budget-toggle-new-client");
+  if (btn) btn.textContent = "+ Novo";
   renderBudgetLiveSummary();
   animateFirstCard(refs.budgetList);
 }
@@ -363,7 +372,7 @@ function updateNavBadges() {
     }
   };
   setBadge("badge-clientes",   state.clients.length);
-  setBadge("badge-orcamentos", state.budgets.filter(b => b.status !== "aprovado").length);
+  setBadge("badge-orçamentos", state.budgets.filter(b => b.status !== "aprovado").length);
   setBadge("badge-projetos",   state.projects.filter(p => p.status !== "entregue").length);
 }
 
@@ -395,7 +404,7 @@ function renderRibbon() {
 
   const items = [
     {
-      label: "Entrega mais proxima",
+      label: "Entrega mais próxima",
       value: nearestProject ? `${getClientName(nearestProject.clientId)} · ${formatShortDate(calcDeliveryDate(nearestProject.startDate, nearestProject.businessDays))}` : "Sem entrega"
     },
     {
@@ -403,7 +412,7 @@ function renderRibbon() {
       value: `${metrics.activeProjects} em andamento`
     },
     {
-      label: "Orcamentos abertos",
+      label: "Orçamentos abertos",
       value: `${metrics.openBudgets} negociando`
     },
     {
@@ -425,17 +434,17 @@ function renderDashboard() {
 
   refs.dashboardKpis.innerHTML = [
     metricCard("Clientes", String(state.clients.length), "base cadastrada", state.clients.length),
-    metricCard("Orcamentos abertos", String(metrics.openBudgets), "entre enviados e negociacao", metrics.openBudgets),
-    metricCard("Projetos ativos", String(metrics.activeProjects), "em execucao agora", metrics.activeProjects),
+    metricCard("Orçamentos abertos", String(metrics.openBudgets), "entre enviados e negociação", metrics.openBudgets),
+    metricCard("Projetos ativos", String(metrics.activeProjects), "em execução agora", metrics.activeProjects),
     metricCard("Lucro previsto", formatCurrency(metrics.projectProfit), "somando projetos atuais", metrics.projectProfit)
   ].join("");
   requestAnimationFrame(animateDashboardNumbers);
 
   refs.heroSignals.innerHTML = [
     signalCard("Hoje", metrics.upcomingProjects[0] ? `Prioridade em ${getClientName(metrics.upcomingProjects[0].clientId)} para entregar em ${formatShortDate(calcDeliveryDate(metrics.upcomingProjects[0].startDate, metrics.upcomingProjects[0].businessDays))}.` : "Nenhuma entrega critica hoje."),
-    signalCard("Margem", metrics.lowMarginProject ? `${metrics.lowMarginProject.title} esta com margem em ${formatPercent(marginPercent(metrics.lowMarginProject))}. Vale revisar custo.` : "Nenhum projeto com margem critica no momento."),
-    signalCard("Comercial", metrics.hotBudget ? `${getClientName(metrics.hotBudget.clientId)} ainda esta em ${metrics.hotBudget.status}. Margem prevista de ${formatPercent(marginPercent(metrics.hotBudget))}.` : "Sem orcamento quente agora."),
-    signalCard("Memoria", metrics.featuredClient ? `${metrics.featuredClient.name} ja tem historico salvo de material e acabamento para proxima obra.` : "Cadastre o primeiro cliente para guardar memoria de obra.")
+    signalCard("Margem", metrics.lowMarginProject ? `${metrics.lowMarginProject.title} está com margem em ${formatPercent(marginPercent(metrics.lowMarginProject))}. Vale revisar custo.` : "Nenhum projeto com margem critica no momento."),
+    signalCard("Comercial", metrics.hotBudget ? `${getClientName(metrics.hotBudget.clientId)} ainda está em ${metrics.hotBudget.status}. Margem prevista de ${formatPercent(marginPercent(metrics.hotBudget))}.` : "Sem orçamento quente agora."),
+    signalCard("Memoria", metrics.featuredClient ? `${metrics.featuredClient.name} já tem histórico salvo de material e acabamento para proxima obra.` : "Cadastre o primeiro cliente para guardar memória de obra.")
   ].join("");
 
   refs.agendaTimeline.innerHTML = renderAgendaTimelineItems(metrics.upcomingProjects);
@@ -443,7 +452,7 @@ function renderDashboard() {
   refs.dashboardSummary.innerHTML = [
     summaryBox("Custo total em projetos", formatCurrency(metrics.projectCost)),
     summaryBox("Valor total fechado", formatCurrency(metrics.projectRevenue)),
-    summaryBox("Margem media", formatPercent(metrics.averageProjectMargin))
+    summaryBox("Margem média", formatPercent(metrics.averageProjectMargin))
   ].join("");
 
   refs.dashboardProjectGrid.innerHTML = renderDashboardProjects(metrics.upcomingProjects);
@@ -461,7 +470,7 @@ function renderClients() {
   });
 
   if (!clients.length) {
-    refs.clientList.innerHTML = emptyState("Nenhum cliente encontrado.", "Preencha o formulario ao lado para cadastrar o primeiro.");
+    refs.clientList.innerHTML = emptyState("Nenhum cliente encontrado.", "Preencha o formulário ao lado para cadastrar o primeiro.");
     return;
   }
 
@@ -475,17 +484,17 @@ function renderClients() {
         <div class="record-head">
           <div class="record-main">
             <h4>${escapeHtml(client.name)}</h4>
-            <p class="record-meta">${escapeHtml(client.phone)} · ${escapeHtml(client.address || client.city || "Sem endereco")} · ${escapeHtml(client.origin || "Origem nao informada")}</p>
+            <p class="record-meta">${escapeHtml(client.phone)} · ${escapeHtml(client.address || client.city || "Sem endereço")} · ${escapeHtml(client.origin || "Origem não informada")}</p>
           </div>
           <span class="status-pill ${clientProjects.length ? "success" : ""}">${clientProjects.length ? "com projeto" : "lead"}</span>
         </div>
         <div class="record-stats">
           <div class="record-stat">
             <span>Ambiente</span>
-            <strong>${escapeHtml(client.environment || "Nao informado")}</strong>
+            <strong>${escapeHtml(client.environment || "Não informado")}</strong>
           </div>
           <div class="record-stat">
-            <span>Orcamentos</span>
+            <span>Orçamentos</span>
             <strong>${clientBudgets.length}</strong>
           </div>
           <div class="record-stat">
@@ -493,7 +502,7 @@ function renderClients() {
             <strong>${clientProjects.length}</strong>
           </div>
         </div>
-        <div class="field-note">${escapeHtml(client.notes || "Sem observacoes ainda.")}</div>
+        <div class="field-note">${escapeHtml(client.notes || "Sem observações ainda.")}</div>
         ${materials.length ? `<div class="material-tags">${materials.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
       </article>
     `;
@@ -502,7 +511,7 @@ function renderClients() {
 
 function renderBudgets() {
   if (!state.budgets.length) {
-    refs.budgetList.innerHTML = emptyState("Nenhum orcamento salvo.", "Preencha o formulario ao lado para criar o primeiro.");
+    refs.budgetList.innerHTML = emptyState("Nenhum orçamento salvo.", "Preencha o formulário ao lado para criar o primeiro.");
     return;
   }
 
@@ -536,7 +545,7 @@ function renderBudgets() {
         <div class="meta-grid">
           <div class="meta-pair">
             <span>Prazo</span>
-            <span>${budget.businessDays} dias uteis</span>
+            <span>${budget.businessDays} dias úteis</span>
           </div>
           <div class="meta-pair">
             <span>Margem</span>
@@ -547,7 +556,7 @@ function renderBudgets() {
             <span>${budget.materials.length} materiais previstos</span>
           </div>
         </div>
-        <div class="field-note">${escapeHtml(budget.description || "Sem descricao adicional.")}</div>
+        <div class="field-note">${escapeHtml(budget.description || "Sem descrição adicional.")}</div>
         ${budget.status !== "aprovado" ? `<button class="button ghost small" data-action="approve-budget" data-budget-id="${budget.id}">Aprovar e jogar em projeto</button>` : ""}
       </article>
     `;
@@ -556,7 +565,7 @@ function renderBudgets() {
 
 function renderProjects() {
   if (!state.projects.length) {
-    refs.projectList.innerHTML = emptyState("Nenhum projeto salvo.", "Aprove um orcamento ou crie um projeto manual.", { view: "orcamentos", label: "Ver orcamentos" });
+    refs.projectList.innerHTML = emptyState("Nenhum projeto salvo.", "Aprove um orçamento ou crie um projeto manual.", { view: "orçamentos", label: "Ver orçamentos" });
     return;
   }
 
@@ -591,7 +600,7 @@ function renderProjects() {
         <div class="meta-grid">
           <div class="meta-pair">
             <span>Prazo</span>
-            <span>${project.businessDays} dias uteis</span>
+            <span>${project.businessDays} dias úteis</span>
           </div>
           <div class="meta-pair">
             <span>Entrega</span>
@@ -625,7 +634,7 @@ function renderAgenda() {
               <span class="status-pill ${getProjectTone(project, deliveryDate)}">${formatShortDate(deliveryDate)}</span>
             </div>
             <div class="summary-line">
-              <span class="muted">${project.businessDays} dias uteis a partir de ${formatShortDate(project.startDate)}</span>
+              <span class="muted">${project.businessDays} dias úteis a partir de ${formatShortDate(project.startDate)}</span>
               <span class="${daysUntil(deliveryDate) < 0 ? "danger" : daysUntil(deliveryDate) <= 3 ? "warning" : "success"}">${formatRemainingDays(deliveryDate)}</span>
             </div>
           </article>
@@ -645,7 +654,7 @@ function renderAgenda() {
           </article>
         `;
       }).join("")
-    : emptyState("Nenhum alerta critico.", "As entregas estao em uma faixa segura no momento.");
+    : emptyState("Nenhum alerta crítico.", "As entregas estão em uma faixa segura no momento.");
 }
 
 function renderFinance() {
@@ -655,7 +664,7 @@ function renderFinance() {
     financeCard("Valor em projetos", formatCurrency(metrics.projectRevenue)),
     financeCard("Custo em projetos", formatCurrency(metrics.projectCost)),
     financeCard("Lucro em projetos", formatCurrency(metrics.projectProfit)),
-    financeCard("Margem media", formatPercent(metrics.averageProjectMargin))
+    financeCard("Margem média", formatPercent(metrics.averageProjectMargin))
   ].join("");
 
   const records = [
@@ -668,7 +677,7 @@ function renderFinance() {
       margin: marginPercent(project)
     })),
     ...state.budgets.map((budget) => ({
-      kind: "Orcamento",
+      kind: "Orçamento",
       name: budget.title,
       clientName: getClientName(budget.clientId),
       revenue: budget.price,
@@ -703,18 +712,62 @@ function renderFinance() {
           </div>
         </article>
       `).join("")
-    : emptyState("Sem dados financeiros ainda.", "Cadastre orcamentos e projetos para ver margem.", { view: "orcamentos", label: "Novo orcamento" });
+    : emptyState("Sem dados financeiros ainda.", "Cadastre orçamentos e projetos para ver margem.", { view: "orçamentos", label: "Novo orçamento" });
 }
 
 function renderBudgetLiveSummary() {
-  const price = Number(refs.budgetForm.elements.price.value || 0);
-  const cost = Number(refs.budgetForm.elements.cost.value || 0);
+  const price        = Number(refs.budgetForm.elements.price.value        || 0);
+  const cost         = Number(refs.budgetForm.elements.cost.value         || 0);
   const businessDays = Number(refs.budgetForm.elements.businessDays.value || 0);
-  refs.budgetLiveSummary.innerHTML = [
-    inlineCard("Lucro estimado", formatCurrency(price - cost)),
-    inlineCard("Margem", formatPercent(price ? ((price - cost) / price) * 100 : 0)),
-    inlineCard("Prazo", businessDays ? `${businessDays} dias uteis` : "Sem prazo")
-  ].join("");
+
+  const profit = price - cost;
+  const margin = price > 0 ? (profit / price) * 100 : 0;
+
+  let tier, label, hint;
+  if (price === 0) {
+    tier = ""; label = "Aguardando valores"; hint = "Preencha o preço e o custo para ver a análise.";
+  } else if (margin < 20) {
+    tier = "critica";   label = "Margem crítica";   hint = "Abaixo de 20% — risco de prejuízo. Revise o custo.";
+  } else if (margin < 30) {
+    tier = "aceitavel"; label = "Margem aceitável"; hint = "Entre 20–30% — dentro do mínimo aceitável.";
+  } else if (margin < 42) {
+    tier = "boa";       label = "Boa margem";       hint = "Entre 30–42% — faixa saudável para o negócio.";
+  } else {
+    tier = "excelente"; label = "Margem excelente"; hint = "Acima de 42% — proposta muito rentável.";
+  }
+
+  const barWidth   = price > 0 ? Math.min((margin / 60) * 100, 100) : 0;
+  const prazoText  = businessDays ? `${businessDays} dias úteis` : "—";
+
+  refs.budgetLiveSummary.innerHTML = `
+    <div class="margin-calc">
+      <div class="margin-calc-values">
+        <div class="margin-calc-item">
+          <span>Preço de venda</span>
+          <strong>${escapeHtml(formatCurrency(price))}</strong>
+        </div>
+        <div class="margin-calc-item">
+          <span>Custo estimado</span>
+          <strong>${escapeHtml(formatCurrency(cost))}</strong>
+        </div>
+        <div class="margin-calc-item">
+          <span>Lucro bruto</span>
+          <strong class="${profit > 0 ? "gold" : ""}">${escapeHtml(formatCurrency(profit))}</strong>
+        </div>
+      </div>
+      ${price > 0 ? `
+      <div class="margin-bar-row">
+        <div class="margin-bar-header">
+          <span class="margin-bar-label ${tier}">${label}</span>
+          <span class="margin-bar-pct ${tier}">${escapeHtml(formatPercent(margin))}</span>
+        </div>
+        <div class="margin-bar-track">
+          <div class="margin-bar-fill ${tier}" style="width:${barWidth}%"></div>
+        </div>
+        <span class="margin-bar-hint">${hint} · Prazo: ${escapeHtml(prazoText)}</span>
+      </div>` : `<span class="margin-bar-hint">${hint}</span>`}
+    </div>
+  `;
 }
 
 function renderProjectLiveSummary() {
@@ -858,7 +911,7 @@ function renderDashboardProjects(projects) {
           <span class="chip ${getProjectTone(project, deliveryDate)}">${escapeHtml(getProjectDisplayStatus(project, deliveryDate))}</span>
         </div>
         <h3>${escapeHtml(project.title)}</h3>
-        <p class="project-subtitle">${escapeHtml(getClientById(project.clientId)?.address || getClientById(project.clientId)?.city || "Sem localizacao")}</p>
+        <p class="project-subtitle">${escapeHtml(getClientById(project.clientId)?.address || getClientById(project.clientId)?.city || "Sem localização")}</p>
         <div class="metric-grid">
           <div>
             <small>Valor</small>
@@ -875,7 +928,7 @@ function renderDashboardProjects(projects) {
         </div>
         <div class="project-band">
           <span>Inicio ${formatShortDate(project.startDate)}</span>
-          <span>${project.businessDays} dias uteis</span>
+          <span>${project.businessDays} dias úteis</span>
           <span>Entrega ${formatShortDate(deliveryDate)}</span>
         </div>
       </article>
@@ -885,7 +938,7 @@ function renderDashboardProjects(projects) {
 
 function renderFeaturedClient(client) {
   if (!client) {
-    return emptyState("Nenhum cliente em destaque.", "Cadastre clientes e materiais para ver historico aqui.");
+    return emptyState("Nenhum cliente em destaque.", "Cadastre clientes e materiais para ver histórico aqui.");
   }
 
   const materials = collectClientMaterials(client.id).slice(0, 6);
@@ -897,7 +950,7 @@ function renderFeaturedClient(client) {
       <div>
         <p class="micro-label">Ficha</p>
         <h4 class="dossier-name">${escapeHtml(client.name)}</h4>
-        <p class="record-meta">${escapeHtml(client.phone)} · ${escapeHtml(client.address || client.city || "Sem endereco")}</p>
+        <p class="record-meta">${escapeHtml(client.phone)} · ${escapeHtml(client.address || client.city || "Sem endereço")}</p>
       </div>
       <div class="status-pill ${projects.length ? "success" : ""}">${projects.length ? "cliente ativo" : "lead salvo"}</div>
     </div>
@@ -911,7 +964,7 @@ function renderFeaturedClient(client) {
         <strong>${projects.length}</strong>
       </div>
       <div class="record-stat">
-        <span>Orcamentos</span>
+        <span>Orçamentos</span>
         <strong>${state.budgets.filter((budget) => budget.clientId === client.id).length}</strong>
       </div>
       <div class="record-stat">
@@ -919,13 +972,13 @@ function renderFeaturedClient(client) {
         <strong>${lastProject ? formatCurrency(lastProject.price - lastProject.cost) : "R$ 0,00"}</strong>
       </div>
     </div>
-    ${materials.length ? `<div class="material-tags">${materials.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : `<p class="field-note">Ainda sem memoria de material cadastrada.</p>`}
+    ${materials.length ? `<div class="material-tags">${materials.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : `<p class="field-note">Ainda sem memória de material cadastrada.</p>`}
   `;
 }
 
 function renderHotBudgets(budgets) {
   if (!budgets.length) {
-    return emptyState("Sem orcamentos em aberto.", "Crie um novo orcamento para alimentar esta fila.");
+    return emptyState("Sem orçamentos em aberto.", "Crie um novo orçamento para alimentar esta fila.");
   }
 
   return budgets.map((budget) => `
@@ -950,17 +1003,17 @@ function renderFinancialHighlight(metrics) {
     <div class="finance-card">
       <p class="micro-label">Projetos</p>
       <div class="finance-value">${formatCurrency(metrics.projectRevenue)}</div>
-      <p class="muted">Valor total em execucao hoje.</p>
+      <p class="muted">Valor total em execução hoje.</p>
     </div>
     <div class="finance-card">
       <p class="micro-label">Custo</p>
       <div class="finance-value">${formatCurrency(metrics.projectCost)}</div>
-      <p class="muted">Material e execucao ja contabilizados.</p>
+      <p class="muted">Material e execução ja contabilizados.</p>
     </div>
     <div class="finance-card">
       <p class="micro-label">Lucro</p>
       <div class="finance-value">${formatCurrency(metrics.projectProfit)}</div>
-      <p class="muted">Margem media de ${formatPercent(metrics.averageProjectMargin)}.</p>
+      <p class="muted">Margem média de ${formatPercent(metrics.averageProjectMargin)}.</p>
     </div>
   `;
 }
@@ -1138,7 +1191,7 @@ function formatRemainingDays(dateString) {
     return "vence hoje";
   }
   if (diff === 1) {
-    return "vence amanha";
+    return "vence amanhã";
   }
   return `faltam ${diff} dias`;
 }
