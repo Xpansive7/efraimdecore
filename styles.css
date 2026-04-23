@@ -813,11 +813,6 @@ textarea {
   transform: none;
 }
 
-body.has-motion .reveal-item {
-  opacity: 0;
-  transform: translateY(24px);
-}
-
 @media (max-width: 1320px) {
   .ribbon,
   .hero-grid,

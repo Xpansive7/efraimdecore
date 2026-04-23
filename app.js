@@ -1141,7 +1141,6 @@ function setupMotion() {
   }
 
   gsap.registerPlugin(ScrollTrigger);
-  document.body.classList.add("has-motion");
 
   gsap.defaults({
     duration: 0.75,
@@ -1177,12 +1176,22 @@ function setupMotion() {
 
   const mm = gsap.matchMedia();
   mm.add("(prefers-reduced-motion: no-preference)", () => {
+    gsap.set(".reveal-item", {
+      autoAlpha: 0,
+      y: 24
+    });
+
     ScrollTrigger.batch(".reveal-item", {
       start: "top 86%",
       onEnter: (batch) => gsap.to(batch, {
         y: 0,
         autoAlpha: 1,
         stagger: 0.06,
+        overwrite: true
+      }),
+      onLeaveBack: (batch) => gsap.set(batch, {
+        y: 24,
+        autoAlpha: 0,
         overwrite: true
       })
     });
