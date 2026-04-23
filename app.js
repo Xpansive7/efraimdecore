@@ -219,6 +219,7 @@ function handleClientSubmit(event) {
   state.clients.unshift(client);
   persistAndRender();
   event.currentTarget.reset();
+  animateFirstCard(refs.clientList);
 }
 
 function handleBudgetSubmit(event) {
@@ -246,6 +247,7 @@ function handleBudgetSubmit(event) {
   persistAndRender();
   event.currentTarget.reset();
   renderBudgetLiveSummary();
+  animateFirstCard(refs.budgetList);
 }
 
 function handleProjectSubmit(event) {
@@ -284,6 +286,7 @@ function handleProjectSubmit(event) {
   event.currentTarget.reset();
   refs.projectSourceBudget.value = "";
   renderProjectLiveSummary();
+  animateFirstCard(refs.projectList);
 }
 
 function handleDocumentClick(event) {
@@ -397,11 +400,12 @@ function renderDashboard() {
   const metrics = getDerivedMetrics();
 
   refs.dashboardKpis.innerHTML = [
-    metricCard("Clientes", String(state.clients.length), "base cadastrada"),
-    metricCard("Orcamentos abertos", String(metrics.openBudgets), "entre enviados e negociacao"),
-    metricCard("Projetos ativos", String(metrics.activeProjects), "em execucao agora"),
-    metricCard("Lucro previsto", formatCurrency(metrics.projectProfit), "somando projetos atuais")
+    metricCard("Clientes", String(state.clients.length), "base cadastrada", state.clients.length),
+    metricCard("Orcamentos abertos", String(metrics.openBudgets), "entre enviados e negociacao", metrics.openBudgets),
+    metricCard("Projetos ativos", String(metrics.activeProjects), "em execucao agora", metrics.activeProjects),
+    metricCard("Lucro previsto", formatCurrency(metrics.projectProfit), "somando projetos atuais", metrics.projectProfit)
   ].join("");
+  requestAnimationFrame(animateDashboardNumbers);
 
   refs.heroSignals.innerHTML = [
     signalCard("Hoje", metrics.upcomingProjects[0] ? `Prioridade em ${getClientName(metrics.upcomingProjects[0].clientId)} para entregar em ${formatShortDate(calcDeliveryDate(metrics.upcomingProjects[0].startDate, metrics.upcomingProjects[0].businessDays))}.` : "Nenhuma entrega critica hoje."),
@@ -703,20 +707,57 @@ function renderProjectLiveSummary() {
 }
 
 function setView(view) {
+  const oldPanel = refs.panels.find((p) => p.dataset.viewPanel === currentView);
   currentView = view;
+
   refs.menuItems.forEach((item) => {
     item.classList.toggle("active", item.dataset.view === view);
   });
-  refs.panels.forEach((panel) => {
-    panel.classList.toggle("active", panel.dataset.viewPanel === view);
-  });
-  syncViewMeta();
+
+  if (oldPanel) oldPanel.classList.remove("active");
+
+  const newPanel = refs.panels.find((p) => p.dataset.viewPanel === view);
+  if (newPanel) {
+    newPanel.classList.add("active");
+
+    if (window.gsap) {
+      gsap.fromTo(
+        newPanel,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.44, ease: "power3.out" }
+      );
+
+      const cards = newPanel.querySelectorAll(
+        ".record-card, .budget-card, .kpi-card, .signal-card, .flow-card, .project-card, .alert-card, .board, .hero-panel, .timeline-panel, .ribbon-item"
+      );
+      if (cards.length) {
+        gsap.fromTo(
+          cards,
+          { autoAlpha: 0, y: 18 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            stagger: 0.055,
+            duration: 0.55,
+            ease: "power3.out",
+            delay: 0.1,
+            overwrite: "auto"
+          }
+        );
+      }
+
+      ScrollTrigger.refresh();
+    }
+  }
+
+  syncViewMeta(true);
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function syncViewMeta() {
+function syncViewMeta(animate) {
   refs.title.textContent = views[currentView].title;
   refs.description.textContent = views[currentView].description;
+  if (animate) animateTitleIn(0);
 }
 
 function getDerivedMetrics() {
@@ -922,11 +963,12 @@ function emptyState(title, description) {
   `;
 }
 
-function metricCard(label, value, note) {
+function metricCard(label, value, note, rawValue) {
+  const rawAttr = rawValue !== undefined ? ` data-raw="${rawValue}"` : "";
   return `
     <div class="kpi-card">
       <span class="micro-label">${escapeHtml(label)}</span>
-      <strong>${escapeHtml(value)}</strong>
+      <strong${rawAttr}>${escapeHtml(value)}</strong>
       <small>${escapeHtml(note)}</small>
     </div>
   `;
@@ -1136,72 +1178,149 @@ function escapeHtml(value) {
 }
 
 function setupMotion() {
-  if (!window.gsap || !window.ScrollTrigger) {
-    return;
-  }
+  if (!window.gsap) return;
 
-  gsap.registerPlugin(ScrollTrigger);
+  const plugins = [ScrollTrigger];
+  if (window.SplitText) plugins.push(SplitText);
+  gsap.registerPlugin(...plugins);
 
-  gsap.defaults({
-    duration: 0.75,
-    ease: "power2.out"
-  });
+  gsap.defaults({ duration: 0.75, ease: "power2.out" });
 
-  gsap.from(".brand", {
-    y: 20,
-    autoAlpha: 0,
-    duration: 0.9
-  });
+  buildIntroTimeline();
+  setupScrollReveals();
+  setupAmbientFloat();
+  setupBackgroundDrift();
+}
 
-  gsap.from(".menu-item", {
-    x: -16,
-    autoAlpha: 0,
-    stagger: 0.05,
-    delay: 0.08
-  });
+function buildIntroTimeline() {
+  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-  gsap.from(".masthead-copy > *", {
-    y: 18,
-    autoAlpha: 0,
-    stagger: 0.07,
-    delay: 0.16
-  });
+  tl.from(".brand", { y: 36, autoAlpha: 0, duration: 1 })
+    .from(".menu-item", { x: -26, autoAlpha: 0, stagger: 0.065, duration: 0.6 }, "-=0.65")
+    .from(".rail-panel.secondary", { y: 22, autoAlpha: 0, duration: 0.7 }, "-=0.42")
+    .from(".masthead", { y: 30, autoAlpha: 0, duration: 0.8 }, "-=0.45")
+    .from(".ribbon-item", { y: 20, autoAlpha: 0, stagger: 0.08, duration: 0.6 }, "-=0.4");
 
-  gsap.from(".masthead-actions .button", {
-    y: 16,
-    autoAlpha: 0,
-    stagger: 0.06,
-    delay: 0.24
-  });
+  animateTitleIn(0.38);
+}
 
+function setupScrollReveals() {
   const mm = gsap.matchMedia();
   mm.add("(prefers-reduced-motion: no-preference)", () => {
-    gsap.set(".reveal-item", {
-      autoAlpha: 0,
-      y: 24
-    });
+    gsap.set(".reveal-item", { autoAlpha: 0, y: 28 });
 
     ScrollTrigger.batch(".reveal-item", {
-      start: "top 86%",
-      onEnter: (batch) => gsap.to(batch, {
-        y: 0,
-        autoAlpha: 1,
-        stagger: 0.06,
-        overwrite: true
-      }),
-      onLeaveBack: (batch) => gsap.set(batch, {
-        y: 24,
-        autoAlpha: 0,
-        overwrite: true
-      })
+      start: "top 88%",
+      onEnter: (batch) =>
+        gsap.to(batch, {
+          autoAlpha: 1,
+          y: 0,
+          stagger: 0.07,
+          duration: 0.85,
+          ease: "power3.out",
+          overwrite: "auto"
+        }),
+      onLeaveBack: (batch) =>
+        gsap.set(batch, { autoAlpha: 0, y: 28, overwrite: "auto" })
     });
+  });
+}
 
-    gsap.to(".kpi-card:first-child", {
-      y: -4,
-      duration: 1.9,
+function setupAmbientFloat() {
+  const mm = gsap.matchMedia();
+  mm.add("(prefers-reduced-motion: no-preference)", () => {
+    gsap.to(".kpi-card:nth-child(odd)", {
+      y: -6,
+      duration: 2.4,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut"
+    });
+    gsap.to(".kpi-card:nth-child(even)", {
+      y: -5,
+      duration: 2.0,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+      delay: 0.5
+    });
+    gsap.to(".brand", {
+      boxShadow: "0 0 52px rgba(201,168,76,0.2), inset 0 0 0 1px rgba(201,168,76,0.24)",
+      duration: 3.4,
       repeat: -1,
       yoyo: true,
       ease: "sine.inOut"
     });
   });
+}
+
+function setupBackgroundDrift() {
+  const mm = gsap.matchMedia();
+  mm.add("(prefers-reduced-motion: no-preference)", () => {
+    gsap.to(".background-mesh", {
+      backgroundPosition: "72px 72px",
+      duration: 40,
+      repeat: -1,
+      ease: "none"
+    });
+  });
+}
+
+function animateTitleIn(delay) {
+  if (!window.gsap || !refs.title) return;
+  delay = delay || 0;
+
+  if (window.SplitText) {
+    const split = SplitText.create(refs.title, { type: "words", mask: "words" });
+    gsap.fromTo(
+      split.words,
+      { yPercent: 112 },
+      {
+        yPercent: 0,
+        stagger: 0.06,
+        duration: 0.78,
+        ease: "power3.out",
+        delay,
+        onComplete: () => split.revert()
+      }
+    );
+  } else {
+    gsap.fromTo(
+      refs.title,
+      { y: 24, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.75, ease: "power3.out", delay }
+    );
+  }
+}
+
+function animateDashboardNumbers() {
+  if (!window.gsap) return;
+
+  refs.dashboardKpis.querySelectorAll("strong[data-raw]").forEach((el) => {
+    const raw = parseFloat(el.dataset.raw);
+    if (!isFinite(raw) || raw === 0) return;
+
+    const isCurrency = el.textContent.includes("R$");
+    const obj = { val: 0 };
+
+    gsap.to(obj, {
+      val: raw,
+      duration: 1.3,
+      ease: "power2.out",
+      onUpdate() {
+        el.textContent = isCurrency ? formatCurrency(obj.val) : String(Math.round(obj.val));
+      }
+    });
+  });
+}
+
+function animateFirstCard(listEl) {
+  if (!window.gsap || !listEl) return;
+  const first = listEl.firstElementChild;
+  if (!first) return;
+  gsap.fromTo(
+    first,
+    { autoAlpha: 0, y: 22, scale: 0.97 },
+    { autoAlpha: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }
+  );
 }

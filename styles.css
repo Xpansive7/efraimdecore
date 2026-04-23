@@ -864,3 +864,153 @@ textarea {
     max-width: none;
   }
 }
+
+/* ── Visual premium ──────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+::selection { background: var(--gold-dim); color: var(--white); }
+
+/* Card hover lift */
+.record-card,
+.budget-card,
+.project-card,
+.kpi-card,
+.signal-card {
+  transition: transform 0.32s cubic-bezier(0.34, 1.2, 0.64, 1), box-shadow 0.32s ease;
+  will-change: transform;
+}
+
+.record-card:hover,
+.budget-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.44), 0 0 0 1px var(--gold-dim);
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.48), 0 0 0 1px var(--gold-dim);
+}
+
+.project-card.featured:hover {
+  box-shadow: 0 36px 90px rgba(0, 0, 0, 0.52), 0 0 40px rgba(201, 168, 76, 0.16), 0 0 0 1px rgba(201, 168, 76, 0.55);
+}
+
+.kpi-card:hover,
+.signal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--gold-dim);
+}
+
+/* KPI accent line */
+.kpi-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.kpi-card:hover::after {
+  opacity: 1;
+}
+
+/* Hero panel orb animation */
+.hero-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-panel::after {
+  content: "";
+  position: absolute;
+  top: -80px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201, 168, 76, 0.1) 0%, transparent 68%);
+  animation: hero-orb 9s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes hero-orb {
+  0%,  100% { transform: translate(0, 0) scale(1); }
+  33%        { transform: translate(-22px, 18px) scale(1.18); }
+  66%        { transform: translate(14px, -12px) scale(0.86); }
+}
+
+/* Button transitions */
+.button {
+  transition: box-shadow 0.25s ease, opacity 0.2s ease, transform 0.18s ease;
+}
+
+.button.solid:hover {
+  box-shadow: 0 8px 28px rgba(201, 168, 76, 0.28);
+  opacity: 0.92;
+}
+
+.button.ghost:hover {
+  border-color: rgba(201, 168, 76, 0.52);
+  background: rgba(201, 168, 76, 0.07);
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+/* Menu item slide */
+.menu-item {
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-item:hover:not(.active) {
+  transform: translateX(4px);
+}
+
+/* Input focus glow */
+.stack-form input:focus,
+.stack-form select:focus,
+.stack-form textarea:focus,
+.search-input:focus {
+  outline: none;
+  border-color: var(--gold-dim);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Danger pill pulse */
+@keyframes pulse-danger {
+  0%,  100% { box-shadow: 0 0 0 0 rgba(210, 111, 99, 0); }
+  55%        { box-shadow: 0 0 0 5px rgba(210, 111, 99, 0.2); }
+}
+
+.status-pill.danger {
+  animation: pulse-danger 2.6s ease-in-out infinite;
+}
+
+/* Board hover */
+.board {
+  transition: box-shadow 0.3s ease;
+}
+
+.board:hover {
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.36);
+}
