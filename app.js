@@ -1,4 +1,7 @@
 const STORAGE_KEY = "efraim-dashboard-v1";
+const SB_URL  = "https://qlgiwxdyqcgepoimubhw.supabase.co";
+const SB_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFsZ2l3eGR5cWNnZXBvaW11Ymh3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5ODQ0NjgsImV4cCI6MjA5MjU2MDQ2OH0.YB5BlC-c_xYwp5vAJFo5tsYxCFuzHnIEZmLUf6io2tk";
+const sb      = supabase.createClient(SB_URL, SB_KEY);
 
 const views = {
   dashboard:  { title: "Dashboard",    description: "" },
@@ -119,7 +122,7 @@ defaultState.projects = [
   }
 ];
 
-let state = loadState();
+let state = { clients: [], budgets: [], projects: [] };
 let currentView = "dashboard";
 
 const refs = {
@@ -158,8 +161,8 @@ const refs = {
 };
 
 bindEvents();
-renderAll();
 setupMotion();
+initApp();
 
 function bindEvents() {
   refs.menuItems.forEach((item) => {
@@ -1424,28 +1427,113 @@ function sum(list, key) {
   return list.reduce((acc, item) => acc + Number(item[key] || 0), 0);
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+// ── Mapeamento JS (camelCase) ↔ Supabase (snake_case) ──────
+function clientToRow(c) {
+  return { id: c.id, name: c.name, phone: c.phone||"", address: c.address||"",
+           origin: c.origin||"", environment: c.environment||"",
+           city: c.city||"", notes: c.notes||"", created_at: c.createdAt||today() };
+}
+function rowToClient(r) {
+  return { id: r.id, name: r.name, phone: r.phone, address: r.address,
+           origin: r.origin, environment: r.environment, city: r.city,
+           notes: r.notes, createdAt: r.created_at };
+}
+function budgetToRow(b) {
+  return { id: b.id, client_id: b.clientId||null, title: b.title,
+           status: b.status, price: b.price||0, cost: b.cost||0,
+           business_days: b.businessDays||0, description: b.description||"",
+           materials: b.materials||[], created_at: b.createdAt||today() };
+}
+function rowToBudget(r) {
+  return { id: r.id, clientId: r.client_id, title: r.title, status: r.status,
+           price: Number(r.price)||0, cost: Number(r.cost)||0,
+           businessDays: r.business_days||0, description: r.description||"",
+           materials: r.materials||[], createdAt: r.created_at };
+}
+function projectToRow(p) {
+  return { id: p.id, client_id: p.clientId||null, source_budget_id: p.sourceBudgetId||null,
+           title: p.title, status: p.status, price: p.price||0, cost: p.cost||0,
+           business_days: p.businessDays||0, start_date: p.startDate||today(),
+           description: p.description||"", materials: p.materials||[],
+           created_at: p.createdAt||today() };
+}
+function rowToProject(r) {
+  return { id: r.id, clientId: r.client_id, sourceBudgetId: r.source_budget_id,
+           title: r.title, status: r.status, price: Number(r.price)||0,
+           cost: Number(r.cost)||0, businessDays: r.business_days||0,
+           startDate: r.start_date, description: r.description||"",
+           materials: r.materials||[], createdAt: r.created_at };
 }
 
-function loadState() {
+// ── Init: carrega do Supabase (migra localStorage se necessário) ──
+async function initApp() {
+  showLoadingOverlay(true);
+  try {
+    const [{ data: cls }, { data: bud }, { data: prj }] = await Promise.all([
+      sb.from("clients").select("*").order("created_at"),
+      sb.from("budgets").select("*").order("created_at"),
+      sb.from("projects").select("*").order("created_at"),
+    ]);
+
+    const hasRemoteData = (cls||[]).length || (bud||[]).length || (prj||[]).length;
+
+    if (!hasRemoteData) {
+      // Tenta migrar dados do localStorage
+      const local = migrateFromLocalStorage();
+      if (local.clients.length || local.budgets.length || local.projects.length) {
+        state = local;
+        await syncToSupabase();
+      } else {
+        // Primeira vez: sobe os dados demo
+        state = structuredClone(defaultState);
+        await syncToSupabase();
+      }
+    } else {
+      state = {
+        clients:  (cls||[]).map(rowToClient),
+        budgets:  (bud||[]).map(rowToBudget),
+        projects: (prj||[]).map(rowToProject),
+      };
+    }
+  } catch (err) {
+    console.error("Supabase load failed, usando localStorage:", err);
+    state = migrateFromLocalStorage();
+  }
+  showLoadingOverlay(false);
+  renderAll();
+}
+
+function migrateFromLocalStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
-      return structuredClone(defaultState);
-    }
+    if (!raw) return { clients: [], budgets: [], projects: [] };
+    const p = JSON.parse(raw);
+    return { clients: p.clients||[], budgets: p.budgets||[], projects: p.projects||[] };
+  } catch { return { clients: [], budgets: [], projects: [] }; }
+}
 
-    const parsed = JSON.parse(raw);
-    return {
-      clients: parsed.clients || [],
-      budgets: parsed.budgets || [],
-      projects: parsed.projects || []
-    };
-  } catch (error) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
-    return structuredClone(defaultState);
+// ── Persiste no Supabase (fire-and-forget) ───────────────────
+function saveState() {
+  syncToSupabase().catch(err => console.error("Sync falhou:", err));
+}
+
+async function syncToSupabase() {
+  const ops = [];
+  if (state.clients.length)  ops.push(sb.from("clients").upsert(state.clients.map(clientToRow)));
+  if (state.budgets.length)  ops.push(sb.from("budgets").upsert(state.budgets.map(budgetToRow)));
+  if (state.projects.length) ops.push(sb.from("projects").upsert(state.projects.map(projectToRow)));
+  if (ops.length) await Promise.all(ops);
+}
+
+function showLoadingOverlay(show) {
+  let el = document.getElementById("sb-loading");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "sb-loading";
+    el.innerHTML = `<div class="sb-spinner"></div><p>Carregando dados…</p>`;
+    document.body.appendChild(el);
   }
+  el.style.display = show ? "flex" : "none";
 }
 
 function escapeHtml(value) {

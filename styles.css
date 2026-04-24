@@ -1071,3 +1071,19 @@ svg { display: block; }
   border-color: rgba(168,82,72,.6) !important;
   background: rgba(168,82,72,.06) !important;
 }
+
+/* ─── Loading overlay Supabase ───────────────────────────── */
+#sb-loading {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  font-size: 0.9rem; color: var(--t2);
+}
+.sb-spinner {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid var(--b1);
+  border-top-color: var(--gold);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
