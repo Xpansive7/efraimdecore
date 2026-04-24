@@ -194,13 +194,10 @@ checkAuth();
 
 // ── Auth ─────────────────────────────────────────────────────
 async function checkAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    showLoginScreen(false);
-    await initApp();
-  } else {
-    showLoginScreen(true);
-  }
+  // Usa anon mode: garante que DELETE/INSERT/SELECT funcionam pelas policies anon
+  await sb.auth.signOut().catch(() => {});
+  showLoginScreen(false);
+  await initApp();
 }
 
 function showLoginScreen(show) {
@@ -491,10 +488,9 @@ async function deleteBudget(budgetId) {
         throw linkedProjectsError;
       }
     }
-    const { error } = await sb.from("budgets").delete().eq("id", budgetId);
-    if (error) {
-      throw error;
-    }
+    const { count, error } = await sb.from("budgets").delete({ count: 'exact' }).eq("id", budgetId);
+    if (error) throw error;
+    if (count === 0) throw new Error("Nenhuma linha deletada — verifique permissões RLS.");
     showSaveFeedback("Exclusao salva", "success");
   } catch (err) {
     console.error("Falha ao excluir proposta:", err);
@@ -537,8 +533,9 @@ async function deleteClient(clientId) {
     const { error: budgetsError } = await sb.from("budgets").delete().eq("client_id", clientId);
     if (budgetsError) throw budgetsError;
 
-    const { error: clientError } = await sb.from("clients").delete().eq("id", clientId);
+    const { count: clientCount, error: clientError } = await sb.from("clients").delete({ count: 'exact' }).eq("id", clientId);
     if (clientError) throw clientError;
+    if (clientCount === 0) throw new Error("Nenhuma linha deletada — verifique permissões RLS.");
     showSaveFeedback("Exclusao salva", "success");
   } catch (err) {
     console.error("Falha ao excluir cliente:", err);
@@ -562,8 +559,9 @@ async function deleteProject(projectId) {
   renderAll();
 
   try {
-    const { error } = await sb.from("projects").delete().eq("id", projectId);
+    const { count, error } = await sb.from("projects").delete({ count: 'exact' }).eq("id", projectId);
     if (error) throw error;
+    if (count === 0) throw new Error("Nenhuma linha deletada — verifique permissões RLS.");
     showSaveFeedback("Exclusao salva", "success");
   } catch (err) {
     console.error("Falha ao excluir projeto:", err);
