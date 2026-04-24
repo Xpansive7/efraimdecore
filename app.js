@@ -438,6 +438,13 @@ async function handleDocumentClick(event) {
       await deleteClient(clientId);
     }
   }
+
+  if (action === "delete-project") {
+    const projectId = event.target.dataset.projectId;
+    if (projectId) {
+      await deleteProject(projectId);
+    }
+  }
 }
 
 function fillProjectFromBudget(budget) {
@@ -537,6 +544,29 @@ async function deleteClient(clientId) {
     console.error("Falha ao excluir cliente:", err);
     state.clients = previousClients;
     state.budgets = previousBudgets;
+    state.projects = previousProjects;
+    renderAll();
+    showSaveFeedback("Erro ao excluir", "error");
+  }
+}
+
+async function deleteProject(projectId) {
+  const project = state.projects.find((item) => item.id === projectId);
+  if (!project || !window.confirm(`Excluir o projeto "${project.title || "Sem título"}"?`)) {
+    return;
+  }
+
+  const previousProjects = [...state.projects];
+  showSaveFeedback("Excluindo projeto...", "pending");
+  state.projects = state.projects.filter((item) => item.id !== projectId);
+  renderAll();
+
+  try {
+    const { error } = await sb.from("projects").delete().eq("id", projectId);
+    if (error) throw error;
+    showSaveFeedback("Exclusao salva", "success");
+  } catch (err) {
+    console.error("Falha ao excluir projeto:", err);
     state.projects = previousProjects;
     renderAll();
     showSaveFeedback("Erro ao excluir", "error");
@@ -821,6 +851,7 @@ function renderProjects() {
         </div>
         ${project.notes ? `<div class="field-note">${escapeHtml(project.notes)}</div>` : ""}
         ${renderMaterialList(project.materials.slice(0, 3))}
+        <button class="button ghost small" data-action="delete-project" data-project-id="${project.id}">Excluir projeto</button>
       </article>
     `;
   }).join("");
@@ -1913,3 +1944,4 @@ function animateFirstCard(listEl) {
     { autoAlpha: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" }
   );
 }
+
