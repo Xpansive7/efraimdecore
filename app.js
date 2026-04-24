@@ -1525,26 +1525,12 @@ async function initApp() {
       sb.from("projects").select("*").order("created_at"),
     ]);
 
-    const hasRemoteData = (cls||[]).length || (bud||[]).length || (prj||[]).length;
-
-    if (!hasRemoteData) {
-      // Tenta migrar dados do localStorage
-      const local = migrateFromLocalStorage();
-      if (local.clients.length || local.budgets.length || local.projects.length) {
-        state = local;
-        await syncToSupabase();
-      } else {
-        // Primeira vez: sobe os dados demo
-        state = structuredClone(defaultState);
-        await syncToSupabase();
-      }
-    } else {
-      state = {
-        clients:  (cls||[]).map(rowToClient),
-        budgets:  (bud||[]).map(rowToBudget),
-        projects: (prj||[]).map(rowToProject),
-      };
-    }
+    state = {
+      clients:  (cls||[]).map(rowToClient),
+      budgets:  (bud||[]).map(rowToBudget),
+      projects: (prj||[]).map(rowToProject),
+    };
+    localStorage.removeItem(STORAGE_KEY);
   } catch (err) {
     console.error("Supabase load failed, usando localStorage:", err);
     state = migrateFromLocalStorage();
