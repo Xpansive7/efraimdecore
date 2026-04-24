@@ -138,6 +138,7 @@ const refs = {
   featuredClientCard: document.getElementById("featured-client-card"),
   hotBudgets: document.getElementById("hot-budgets"),
   financialHighlight: document.getElementById("financial-highlight"),
+  financeChartArea: document.getElementById("finance-chart-area"),
   clientForm: document.getElementById("client-form"),
   clientSearch: document.getElementById("client-search"),
   clientList: document.getElementById("client-list"),
@@ -686,6 +687,9 @@ function renderFinance() {
     }))
   ].sort((a, b) => b.margin - a.margin);
 
+  const chartItems = [...state.projects, ...state.budgets].filter(x => x.price > 0);
+  refs.financeChartArea.innerHTML = buildSVGLineChart(chartItems);
+
   refs.financeList.innerHTML = records.length
     ? records.map((record) => {
         const tier = record.margin < 25 ? "critica" : record.margin < 35 ? "aceitavel" : record.margin < 45 ? "boa" : "excelente";
@@ -997,39 +1001,79 @@ function renderHotBudgets(budgets) {
 }
 
 function renderFinancialHighlight(metrics) {
-  const projects = state.projects.slice(0, 4);
-  const maxVal   = projects.reduce((m, p) => Math.max(m, p.price), 1);
-
-  const chartRows = projects.length
-    ? projects.map((p) => {
-        const revW  = (p.price / maxVal) * 100;
-        const costW = (p.cost  / maxVal) * 100;
-        return `
-          <div class="chart-row">
-            <span class="chart-label">${escapeHtml(p.title)}</span>
-            <div class="chart-bars">
-              <div class="chart-bar-wrap"><div class="chart-bar revenue" style="width:${revW}%"></div></div>
-              <div class="chart-bar-wrap"><div class="chart-bar cost"    style="width:${costW}%"></div></div>
-            </div>
-            <span class="chart-val">${formatCurrency(p.price - p.cost)}</span>
-          </div>`;
-      }).join("")
-    : `<p class="muted" style="padding:8px 0">Nenhum projeto ainda.</p>`;
-
+  const items = [...state.projects, ...state.budgets].filter(x => x.price > 0);
   return `
-    <div class="finance-chart">
-      <div class="finance-chart-legend">
-        <span class="legend-dot revenue"></span><span>Receita</span>
-        <span class="legend-dot cost"></span><span>Custo</span>
-      </div>
-      ${chartRows}
-    </div>
-    <div class="finance-totals">
+    ${buildSVGLineChart(items)}
+    <div class="finance-totals" style="margin-top:12px">
       <div class="finance-total-item"><span>Total em projetos</span><strong>${formatCurrency(metrics.projectRevenue)}</strong></div>
       <div class="finance-total-item"><span>Lucro total</span><strong class="gold">${formatCurrency(metrics.projectProfit)}</strong></div>
       <div class="finance-total-item"><span>Margem média</span><strong>${formatPercent(metrics.averageProjectMargin)}</strong></div>
     </div>
   `;
+}
+
+function buildSVGLineChart(items) {
+  if (!items.length) return `<p class="muted" style="padding:12px 0">Nenhum dado ainda.</p>`;
+
+  const W = 460, H = 140;
+  const pad = { t: 14, r: 14, b: 30, l: 10 };
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const maxY = items.reduce((m, x) => Math.max(m, x.price), 1);
+  const n = items.length;
+  const xOf = i => pad.l + (n < 2 ? cW / 2 : (i / (n - 1)) * cW);
+  const yOf = v => pad.t + cH - (v / maxY) * cH;
+
+  const revPts    = items.map((x, i) => [xOf(i), yOf(x.price)]);
+  const costPts   = items.map((x, i) => [xOf(i), yOf(x.cost)]);
+  const profitPts = items.map((x, i) => [xOf(i), yOf(Math.max(0, x.price - x.cost))]);
+
+  const mkLine = pts => pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const mkArea = pts => {
+    const base = pad.t + cH;
+    return `${mkLine(pts)} L${pts[pts.length - 1][0].toFixed(1)} ${base} L${pts[0][0].toFixed(1)} ${base} Z`;
+  };
+
+  const grid = [0.25, 0.5, 0.75].map(f => {
+    const y = (pad.t + cH * (1 - f)).toFixed(1);
+    return `<line x1="${pad.l}" y1="${y}" x2="${W - pad.r}" y2="${y}" stroke="rgba(255,255,255,.05)" stroke-width="1"/>`;
+  }).join("");
+
+  const ticks = items.map((x, i) => {
+    const px = xOf(i).toFixed(1);
+    const label = (x.title || "").slice(0, 10);
+    return `<text x="${px}" y="${H - 5}" text-anchor="middle" class="chart-tick">${escapeHtml(label)}</text>`;
+  }).join("");
+
+  const revDots    = revPts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="var(--bg-3)" stroke="#c4a44a" stroke-width="2"/>`).join("");
+  const costDots   = costPts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="rgba(255,255,255,.25)"/>`).join("");
+  const profitDots = profitPts.map(([x, y]) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--ok)" fill-opacity=".9"/>`).join("");
+
+  return `
+  <div class="lc-legend">
+    <span class="lc-dot" style="background:#c4a44a"></span>Receita
+    <span class="lc-dot" style="background:rgba(255,255,255,.3)"></span>Custo
+    <span class="lc-dot" style="background:var(--ok)"></span>Lucro
+  </div>
+  <svg class="line-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    <defs>
+      <linearGradient id="areaRev" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#c4a44a" stop-opacity=".28"/>
+        <stop offset="100%" stop-color="#c4a44a" stop-opacity=".01"/>
+      </linearGradient>
+      <linearGradient id="areaProfit" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#5fa870" stop-opacity=".18"/>
+        <stop offset="100%" stop-color="#5fa870" stop-opacity=".01"/>
+      </linearGradient>
+    </defs>
+    ${grid}
+    <path d="${mkArea(revPts)}" fill="url(#areaRev)"/>
+    <path d="${mkArea(profitPts)}" fill="url(#areaProfit)"/>
+    <path d="${mkLine(costPts)}"   stroke="rgba(255,255,255,.28)" stroke-width="1.6" fill="none" stroke-dasharray="2000" stroke-dashoffset="2000" class="lc-path" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${mkLine(profitPts)}" stroke="#5fa870"              stroke-width="1.8" fill="none" stroke-dasharray="2000" stroke-dashoffset="2000" class="lc-path" style="animation-delay:.1s" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${mkLine(revPts)}"    stroke="#c4a44a"              stroke-width="2.4" fill="none" stroke-dasharray="2000" stroke-dashoffset="2000" class="lc-path" style="animation-delay:.2s" stroke-linecap="round" stroke-linejoin="round"/>
+    ${costDots}${profitDots}${revDots}
+    ${ticks}
+  </svg>`;
 }
 
 function renderMaterialList(materials) {
