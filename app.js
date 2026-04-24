@@ -403,7 +403,7 @@ function handleDocumentClick(event) {
     if (budget) {
       budget.status = "aprovado";
       fillProjectFromBudget(budget);
-      persistAndRender(false);
+      persistAndRender();
       setView("projetos");
     }
   }
