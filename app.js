@@ -162,9 +162,59 @@ const refs = {
 
 bindEvents();
 setupMotion();
-initApp();
+checkAuth();
+
+// ── Auth ─────────────────────────────────────────────────────
+async function checkAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    showLoginScreen(false);
+    await initApp();
+  } else {
+    showLoginScreen(true);
+  }
+}
+
+function showLoginScreen(show) {
+  const el = document.getElementById("login-screen");
+  const app = document.querySelector(".app-shell");
+  const mob = document.getElementById("mobile-nav");
+  if (el)  el.style.display  = show ? "flex" : "none";
+  if (app) app.style.display = show ? "none" : "";
+  if (mob) mob.style.display = show ? "none" : "";
+  const logoutBtn = document.getElementById("btn-logout");
+  if (logoutBtn) logoutBtn.style.display = show ? "none" : "inline-flex";
+}
 
 function bindEvents() {
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email    = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+      const btn      = document.getElementById("login-btn");
+      const errEl    = document.getElementById("login-error");
+      btn.textContent = "Entrando…"; btn.disabled = true;
+      errEl.style.display = "none";
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        errEl.textContent = "E-mail ou senha incorretos.";
+        errEl.style.display = "block";
+        btn.textContent = "Entrar"; btn.disabled = false;
+      } else {
+        showLoginScreen(false);
+        await initApp();
+      }
+    });
+  }
+  const logoutBtn = document.getElementById("btn-logout");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async () => {
+      await sb.auth.signOut();
+      showLoginScreen(true);
+    });
+  }
   refs.menuItems.forEach((item) => {
     item.addEventListener("click", () => setView(item.dataset.view));
   });

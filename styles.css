@@ -1087,3 +1087,37 @@ svg { display: block; }
   animation: spin .7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Tela de login ──────────────────────────────────────── */
+#login-screen {
+  position: fixed; inset: 0; z-index: 9998;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.login-card {
+  width: 100%; max-width: 380px;
+  padding: 40px 36px;
+  border: 1px solid var(--b1); border-radius: var(--r);
+  background: var(--bg-3); box-shadow: var(--s3);
+}
+.login-brand { margin-bottom: 4px; }
+.login-brand .brand-title {
+  font-family: "Italiana", serif;
+  font-size: 1.9rem; font-weight: 400;
+  color: var(--t1); line-height: 1;
+}
+.login-brand .brand-subtitle {
+  font-family: "Italiana", serif;
+  font-size: 1.1rem; color: var(--gold);
+  margin-top: 2px;
+}
+.login-sub {
+  font-size: 0.78rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--t3);
+  margin-top: 10px;
+}
+.login-error {
+  font-size: 0.84rem; color: var(--err);
+  padding: 8px 12px; border-radius: var(--rx);
+  background: rgba(168,82,72,.08); border: 1px solid rgba(168,82,72,.2);
+}
