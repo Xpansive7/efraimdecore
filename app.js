@@ -291,7 +291,7 @@ function handleClientSubmit(event) {
     notes: String(formData.get("notes") || "").trim()
   };
 
-  if (!client.name || !client.phone) {
+  if (![client.name, client.phone, client.address, client.origin, client.environment, client.city, client.notes].some((value) => String(value).trim())) {
     return;
   }
 
@@ -313,7 +313,7 @@ function handleBudgetSubmit(event) {
   if (newClientFields && !newClientFields.hidden) {
     const name  = newClientName?.value.trim()  || "";
     const phone = newClientPhone?.value.trim() || "";
-    if (name && phone) {
+    if (name || phone) {
       const newClient = { id: crypto.randomUUID(), name, phone, address: "", origin: "", environment: "", city: "", notes: "" };
       state.clients.unshift(newClient);
       clientId = newClient.id;
@@ -333,7 +333,7 @@ function handleBudgetSubmit(event) {
     createdAt:    todayISO()
   };
 
-  if (!budget.clientId || !budget.title) return;
+  if (!budget.clientId && !budget.title && !budget.description && !budget.materials.length && !budget.price && !budget.cost && !budget.businessDays) return;
 
   state.budgets.unshift(budget);
   persistAndRender();
@@ -384,7 +384,7 @@ function handleProjectSubmit(event) {
   animateFirstCard(refs.projectList);
 }
 
-function handleDocumentClick(event) {
+async function handleDocumentClick(event) {
   const action = event.target.dataset.action;
   if (!action) {
     return;
@@ -405,6 +405,13 @@ function handleDocumentClick(event) {
       fillProjectFromBudget(budget);
       persistAndRender();
       setView("projetos");
+    }
+  }
+
+  if (action === "delete-budget") {
+    const budgetId = event.target.dataset.budgetId;
+    if (budgetId) {
+      await deleteBudget(budgetId);
     }
   }
 }
@@ -428,6 +435,30 @@ function persistAndRender(save = true) {
     saveState();
   }
   renderAll();
+}
+
+async function deleteBudget(budgetId) {
+  const budget = state.budgets.find((item) => item.id === budgetId);
+  if (!budget || !window.confirm(`Excluir a proposta "${budget.title || "Sem titulo"}"?`)) {
+    return;
+  }
+
+  state.budgets = state.budgets.filter((item) => item.id !== budgetId);
+  if (refs.projectSourceBudget?.value === budgetId) {
+    refs.projectSourceBudget.value = "";
+  }
+  renderAll();
+
+  try {
+    const { error } = await sb.from("budgets").delete().eq("id", budgetId);
+    if (error) {
+      throw error;
+    }
+  } catch (err) {
+    console.error("Falha ao excluir proposta:", err);
+    state.budgets.unshift(budget);
+    renderAll();
+  }
 }
 
 function renderAll() {
@@ -647,6 +678,7 @@ function renderBudgets() {
         <div class="field-note">${escapeHtml(budget.description || "Sem descrição adicional.")}</div>
         <button class="button solid wide" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="cliente">↓ Exportar PDF para o cliente</button>
         ${budget.status !== "aprovado" ? `<button class="button ghost small" data-action="approve-budget" data-budget-id="${budget.id}">Aprovar e jogar em projeto</button>` : ""}
+        <button class="button ghost small" data-action="delete-budget" data-budget-id="${budget.id}">Excluir proposta</button>
         <div class="pdf-interno-wrap">
           <span class="pdf-interno-label">⚠ Uso interno</span>
           <button class="button ghost small pdf-interno-btn" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="interno">PDF Interno</button>
