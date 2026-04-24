@@ -12,6 +12,7 @@
   /* gold */
   --gold:     #c4a44a;
   --gold-hi:  #d9bc6e;
+  --gold-lo:  rgba(196,164,74,.5);
   --gold-dim: rgba(196,164,74,.18);
   --gold-px:  rgba(196,164,74,.08);
 
@@ -151,8 +152,8 @@ svg { display: block; }
 /* ── Micro label ── */
 .micro-label {
   display: inline-flex; align-items: center; gap: 7px;
-  font-size: 0.68rem; font-weight: 600;
-  letter-spacing: .16em; text-transform: uppercase;
+  font-size: 0.74rem; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
   color: var(--gold);
 }
 .micro-label::before {
@@ -395,7 +396,7 @@ svg { display: block; }
 .kpi-card:hover { border-color: var(--gold-dim); transform: translateY(-2px); }
 .kpi-card:hover::after { opacity: 1; }
 .kpi-card small {
-  font-size: 0.66rem; letter-spacing: .16em;
+  font-size: 0.74rem; letter-spacing: .12em;
   text-transform: uppercase; color: var(--t2);
 }
 .kpi-card strong {
@@ -426,7 +427,7 @@ svg { display: block; }
   text-transform: uppercase; letter-spacing: .08em;
   color: var(--gold); margin-bottom: 5px;
 }
-.signal-card p { font-size: 0.84rem; color: var(--t3); line-height: 1.55; }
+.signal-card p { font-size: 0.92rem; color: var(--t2); line-height: 1.6; }
 
 /* ─────────────────────────────────────────────────────────
    TIMELINE
@@ -441,10 +442,10 @@ svg { display: block; }
 .timeline-item strong {
   display: block;
   font-family: var(--sans);
-  font-size: 0.82rem; font-weight: 700;
-  color: var(--t2); margin-bottom: 2px;
+  font-size: 0.94rem; font-weight: 700;
+  color: var(--t1); margin-bottom: 3px;
 }
-.timeline-item p { font-size: 0.84rem; color: var(--t3); }
+.timeline-item p { font-size: 0.9rem; color: var(--t2); }
 .timeline-item.danger  strong { color: var(--err);  }
 .timeline-item.warning strong { color: var(--warn); }
 
@@ -467,10 +468,10 @@ svg { display: block; }
 }
 .flow-card h4 {
   font-family: var(--sans);
-  font-size: 0.88rem; font-weight: 700;
+  font-size: 1rem; font-weight: 700;
   color: var(--t1); margin-bottom: 6px;
 }
-.flow-card p { font-size: 0.75rem; color: var(--t3); line-height: 1.5; }
+.flow-card p { font-size: 0.86rem; color: var(--t2); line-height: 1.55; }
 
 /* ─────────────────────────────────────────────────────────
    AÇÕES / RESUMO
@@ -483,7 +484,7 @@ svg { display: block; }
 }
 .summary-box:last-child  { border-bottom: none; padding-bottom: 0; }
 .summary-box:first-child { padding-top: 0; }
-.muted { font-size: 0.82rem; color: var(--t3); }
+.muted { font-size: 0.88rem; color: var(--t2); }
 .summary-number {
   font-family: var(--serif);
   font-size: 1.3rem; font-weight: 400; color: var(--gold);
@@ -520,8 +521,8 @@ svg { display: block; }
 }
 .project-top  { align-items: center; margin-bottom: 4px; }
 .eyebrow {
-  font-size: 0.58rem; font-weight: 600;
-  letter-spacing: .2em; text-transform: uppercase; color: var(--t3);
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--t2);
 }
 .project-card h3 {
   font-family: var(--serif);
@@ -534,15 +535,15 @@ svg { display: block; }
   gap: 5px; margin-bottom: 12px;
 }
 .metric-grid small {
-  display: block; font-size: 0.55rem;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--t3);
+  display: block; font-size: 0.68rem;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--t2);
 }
-.metric-grid strong { display: block; margin-top: 3px; font-size: 0.9rem; font-weight: 600; color: var(--t1); }
+.metric-grid strong { display: block; margin-top: 4px; font-size: 1rem; font-weight: 600; color: var(--t1); }
 .project-band {
   display: flex; flex-wrap: wrap; gap: 8px;
   padding-top: 10px; border-top: 1px solid var(--b2);
-  font-size: 0.6rem; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--t3);
+  font-size: 0.7rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--t2);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -560,9 +561,9 @@ svg { display: block; }
 }
 .record-main h4 {
   font-family: var(--serif);
-  font-size: 1.3rem; font-weight: 400; color: var(--t1);
+  font-size: 1.45rem; font-weight: 400; color: var(--t1);
 }
-.record-meta { font-size: 0.82rem; color: var(--t3); margin-top: 3px; }
+.record-meta { font-size: 0.9rem; color: var(--t2); margin-top: 4px; }
 .record-head { align-items: flex-start; }
 .record-stats, .meta-grid {
   display: grid; grid-template-columns: repeat(3,1fr); gap: 6px;
@@ -573,12 +574,12 @@ svg { display: block; }
   background: rgba(255,255,255,.012);
 }
 .record-stat span, .meta-pair span:first-child {
-  display: block; font-size: 0.7rem;
-  letter-spacing: .06em; text-transform: uppercase; color: var(--t3);
+  display: block; font-size: 0.76rem;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--t2);
 }
-.record-stat strong { display: block; margin-top: 3px; font-size: 0.92rem; font-weight: 600; color: var(--t1); }
-.meta-pair span:last-child { display: block; margin-top: 3px; font-size: 0.84rem; color: var(--t2); }
-.field-note { font-size: 0.82rem; color: var(--t3); line-height: 1.55; }
+.record-stat strong { display: block; margin-top: 4px; font-size: 1rem; font-weight: 600; color: var(--t1); }
+.meta-pair span:last-child { display: block; margin-top: 4px; font-size: 0.92rem; color: var(--t1); }
+.field-note { font-size: 0.9rem; color: var(--t2); line-height: 1.6; }
 
 /* ─────────────────────────────────────────────────────────
    STATUS PILLS / CHIPS
@@ -620,15 +621,15 @@ svg { display: block; }
   border: 1px solid var(--b2); border-radius: var(--rx);
   background: rgba(255,255,255,.01);
 }
-.material-item strong { display: block; font-size: 0.78rem; color: var(--t2); }
-.material-item .muted { font-size: 0.72rem; }
+.material-item strong { display: block; font-size: 0.88rem; color: var(--t1); }
+.material-item .muted { font-size: 0.8rem; }
 .material-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
 .material-tags span {
-  display: inline-flex; padding: 4px 9px;
+  display: inline-flex; padding: 4px 10px;
   border-radius: var(--pill);
   border: 1px solid var(--b1); background: rgba(255,255,255,.014);
-  font-size: 0.58rem; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--t3);
+  font-size: 0.68rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--t2);
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -640,8 +641,8 @@ svg { display: block; }
 .form-grid-two { grid-template-columns: repeat(2,1fr); }
 .stack-form label { display: grid; gap: 5px; }
 .stack-form > label > span {
-  font-size: 0.75rem; letter-spacing: .05em;
-  text-transform: uppercase; color: var(--t2); font-weight: 500;
+  font-size: 0.82rem; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--t2); font-weight: 600;
 }
 .stack-form input,
 .stack-form select,
@@ -701,7 +702,7 @@ svg { display: block; }
   font-size: 1.55rem; font-weight: 400; color: var(--gold);
   margin-top: 5px; line-height: 1;
 }
-.finance-card p { font-size: 0.72rem; color: var(--t3); margin-top: 4px; }
+.finance-card p { font-size: 0.8rem; color: var(--t2); margin-top: 5px; }
 
 /* ─────────────────────────────────────────────────────────
    ALERTAS
@@ -759,8 +760,8 @@ svg { display: block; }
 }
 .finance-chart-legend {
   display: flex; align-items: center; gap: 12px;
-  margin-bottom: 12px;
-  font-size: 0.72rem; color: var(--t3);
+  margin-bottom: 14px;
+  font-size: 0.82rem; color: var(--t2);
 }
 .legend-dot {
   width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
@@ -778,22 +779,22 @@ svg { display: block; }
 }
 .chart-row:last-child { border-bottom: none; }
 .chart-label {
-  font-size: 0.75rem; color: var(--t2);
+  font-size: 0.86rem; color: var(--t1);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .chart-bars { display: flex; flex-direction: column; gap: 4px; }
 .chart-bar-wrap {
-  height: 6px; border-radius: 3px;
+  height: 8px; border-radius: 4px;
   background: rgba(255,255,255,.06); overflow: hidden;
 }
 .chart-bar {
-  height: 100%; border-radius: 3px;
+  height: 100%; border-radius: 4px;
   transition: width .6s cubic-bezier(.34,1.1,.64,1);
 }
 .chart-bar.revenue { background: linear-gradient(90deg, var(--gold-lo), var(--gold)); }
 .chart-bar.cost    { background: rgba(255,255,255,.18); }
 .chart-val {
-  font-size: 0.78rem; font-weight: 600; color: var(--ok);
+  font-size: 0.9rem; font-weight: 700; color: var(--ok);
   white-space: nowrap;
 }
 
@@ -804,12 +805,12 @@ svg { display: block; }
 }
 .finance-total-item {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 7px 0;
+  padding: 9px 0;
   border-bottom: 1px solid var(--b2);
-  font-size: 0.82rem;
+  font-size: 0.92rem;
 }
 .finance-total-item:last-child { border-bottom: none; }
-.finance-total-item span { color: var(--t3); }
+.finance-total-item span { color: var(--t2); }
 .finance-total-item strong { font-weight: 700; color: var(--t1); }
 .finance-total-item strong.gold { color: var(--gold); }
 
@@ -829,7 +830,7 @@ svg { display: block; }
 .finance-bar-fill.aceitavel { background: var(--warn); }
 .finance-bar-fill.boa       { background: #7ab86a;     }
 .finance-bar-fill.excelente { background: var(--gold); }
-.finance-bar-hint { font-size: 0.7rem; color: var(--t3); }
+.finance-bar-hint { font-size: 0.82rem; color: var(--t2); }
 
 /* ─── Calculadora de margem ───────────────────────────────── */
 .margin-calc {
