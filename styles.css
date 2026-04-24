@@ -1046,3 +1046,28 @@ svg { display: block; }
   .masthead-actions { width: 100%; }
   .masthead-actions .button { flex: 1; justify-content: center; }
 }
+
+/* ─── PDF Interno separado ───────────────────────────────── */
+.pdf-interno-wrap {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(168,82,72,.3);
+}
+.pdf-interno-label {
+  font-size: 0.74rem; font-weight: 600;
+  letter-spacing: .04em; text-transform: uppercase;
+  color: var(--err); opacity: .7;
+  white-space: nowrap;
+}
+.pdf-interno-btn {
+  color: var(--err) !important;
+  border-color: rgba(168,82,72,.3) !important;
+  font-size: 0.76rem !important;
+  opacity: .75;
+}
+.pdf-interno-btn:hover {
+  opacity: 1;
+  border-color: rgba(168,82,72,.6) !important;
+  background: rgba(168,82,72,.06) !important;
+}

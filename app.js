@@ -565,10 +565,11 @@ function renderBudgets() {
           </div>
         </div>
         <div class="field-note">${escapeHtml(budget.description || "Sem descrição adicional.")}</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${budget.status !== "aprovado" ? `<button class="button ghost small" data-action="approve-budget" data-budget-id="${budget.id}">Aprovar e jogar em projeto</button>` : ""}
-          <button class="button ghost small" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="interno">↓ PDF Interno</button>
-          <button class="button ghost small" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="cliente">↓ PDF Cliente</button>
+        <button class="button solid wide" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="cliente">↓ Exportar PDF para o cliente</button>
+        ${budget.status !== "aprovado" ? `<button class="button ghost small" data-action="approve-budget" data-budget-id="${budget.id}">Aprovar e jogar em projeto</button>` : ""}
+        <div class="pdf-interno-wrap">
+          <span class="pdf-interno-label">⚠ Uso interno</span>
+          <button class="button ghost small pdf-interno-btn" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="interno">PDF Interno</button>
         </div>
       </article>
     `;
