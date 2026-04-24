@@ -431,6 +431,13 @@ async function handleDocumentClick(event) {
       await deleteBudget(budgetId);
     }
   }
+
+  if (action === "delete-client") {
+    const clientId = event.target.dataset.clientId;
+    if (clientId) {
+      await deleteClient(clientId);
+    }
+  }
 }
 
 function fillProjectFromBudget(budget) {
@@ -474,6 +481,46 @@ async function deleteBudget(budgetId) {
   } catch (err) {
     console.error("Falha ao excluir proposta:", err);
     state.budgets.unshift(budget);
+    renderAll();
+  }
+}
+
+async function deleteClient(clientId) {
+  const client = state.clients.find((item) => item.id === clientId);
+  if (!client || !window.confirm(`Excluir o cliente "${client.name || "Sem nome"}" e os dados vinculados?`)) {
+    return;
+  }
+
+  const previousClients = [...state.clients];
+  const previousBudgets = [...state.budgets];
+  const previousProjects = [...state.projects];
+
+  state.clients = state.clients.filter((item) => item.id !== clientId);
+  state.budgets = state.budgets.filter((item) => item.clientId !== clientId);
+  state.projects = state.projects.filter((item) => item.clientId !== clientId);
+  renderAll();
+
+  try {
+    const budgetIds = previousBudgets.filter((item) => item.clientId === clientId).map((item) => item.id);
+
+    if (budgetIds.length) {
+      const { error: projectsByBudgetError } = await sb.from("projects").delete().in("source_budget_id", budgetIds);
+      if (projectsByBudgetError) throw projectsByBudgetError;
+    }
+
+    const { error: projectsError } = await sb.from("projects").delete().eq("client_id", clientId);
+    if (projectsError) throw projectsError;
+
+    const { error: budgetsError } = await sb.from("budgets").delete().eq("client_id", clientId);
+    if (budgetsError) throw budgetsError;
+
+    const { error: clientError } = await sb.from("clients").delete().eq("id", clientId);
+    if (clientError) throw clientError;
+  } catch (err) {
+    console.error("Falha ao excluir cliente:", err);
+    state.clients = previousClients;
+    state.budgets = previousBudgets;
+    state.projects = previousProjects;
     renderAll();
   }
 }
@@ -640,6 +687,7 @@ function renderClients() {
         </div>
         <div class="field-note">${escapeHtml(client.notes || "Sem observações ainda.")}</div>
         ${materials.length ? `<div class="material-tags">${materials.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div>` : ""}
+        <button class="button ghost small" data-action="delete-client" data-client-id="${client.id}">Excluir cliente</button>
       </article>
     `;
   }).join("");
