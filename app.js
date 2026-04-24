@@ -403,8 +403,23 @@ async function handleDocumentClick(event) {
     const budgetId = event.target.dataset.budgetId;
     const budget = state.budgets.find((item) => item.id === budgetId);
     if (budget) {
+      if (!state.projects.some((item) => item.sourceBudgetId === budget.id)) {
+        state.projects.unshift({
+          id: crypto.randomUUID(),
+          clientId: budget.clientId || "",
+          sourceBudgetId: budget.id,
+          title: budget.title || "Projeto sem titulo",
+          price: Number(budget.price) || 0,
+          cost: Number(budget.cost) || 0,
+          startDate: todayISO(),
+          businessDays: Number(budget.businessDays) || 0,
+          status: "aguardando",
+          notes: budget.description || "",
+          materials: budget.materials || [],
+          createdAt: todayISO()
+        });
+      }
       budget.status = "aprovado";
-      fillProjectFromBudget(budget);
       persistAndRender();
       setView("projetos");
     }
@@ -971,14 +986,16 @@ function syncViewMeta(animate) {
 }
 
 function getDerivedMetrics() {
-  const openBudgets = state.budgets.filter((budget) => budget.status !== "aprovado").length;
+  const openBudgetsList = state.budgets.filter((budget) => budget.status !== "aprovado");
+  const openBudgets = openBudgetsList.length;
   const activeProjectsList = state.projects.filter((project) => project.status !== "entregue");
   const activeProjects = activeProjectsList.length;
-  const projectRevenue = sum(state.projects, "price");
-  const projectCost = sum(state.projects, "cost");
+  const forecastRecords = [...openBudgetsList, ...activeProjectsList];
+  const projectRevenue = sum(forecastRecords, "price");
+  const projectCost = sum(forecastRecords, "cost");
   const projectProfit = projectRevenue - projectCost;
-  const averageProjectMargin = state.projects.length
-    ? state.projects.reduce((acc, project) => acc + marginPercent(project), 0) / state.projects.length
+  const averageProjectMargin = forecastRecords.length
+    ? forecastRecords.reduce((acc, record) => acc + marginPercent(record), 0) / forecastRecords.length
     : 0;
 
   const upcomingProjects = [...state.projects]
@@ -986,8 +1003,7 @@ function getDerivedMetrics() {
     .sort((a, b) => new Date(a.deliveryDate) - new Date(b.deliveryDate));
 
   const lowMarginProject = [...state.projects].sort((a, b) => marginPercent(a) - marginPercent(b))[0];
-  const topBudgets = [...state.budgets]
-    .filter((budget) => budget.status !== "aprovado")
+  const topBudgets = [...openBudgetsList]
     .sort((a, b) => marginPercent(b) - marginPercent(a))
     .slice(0, 3);
   const hotBudget = topBudgets[0];
@@ -1565,14 +1581,14 @@ function projectToRow(p) {
   return { id: p.id, client_id: p.clientId||null, source_budget_id: p.sourceBudgetId||null,
            title: p.title, status: p.status, price: p.price||0, cost: p.cost||0,
            business_days: p.businessDays||0, start_date: p.startDate||todayISO(),
-           description: p.description||"", materials: p.materials||[],
+           description: p.notes||p.description||"", materials: p.materials||[],
            created_at: p.createdAt||todayISO() };
 }
 function rowToProject(r) {
   return { id: r.id, clientId: r.client_id, sourceBudgetId: r.source_budget_id,
            title: r.title, status: r.status, price: Number(r.price)||0,
            cost: Number(r.cost)||0, businessDays: r.business_days||0,
-           startDate: r.start_date, description: r.description||"",
+           startDate: r.start_date, notes: r.description||"", description: r.description||"",
            materials: r.materials||[], createdAt: r.created_at };
 }
 
