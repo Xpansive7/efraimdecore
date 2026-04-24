@@ -312,7 +312,8 @@ function handleDocumentClick(event) {
 
   if (action === "export-budget-pdf") {
     const budget = state.budgets.find((b) => b.id === event.target.dataset.budgetId);
-    if (budget) exportBudgetPDF(budget);
+    const type   = event.target.dataset.pdfType || "interno";
+    if (budget) exportBudgetPDF(budget, type);
     return;
   }
 
@@ -566,7 +567,8 @@ function renderBudgets() {
         <div class="field-note">${escapeHtml(budget.description || "Sem descrição adicional.")}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           ${budget.status !== "aprovado" ? `<button class="button ghost small" data-action="approve-budget" data-budget-id="${budget.id}">Aprovar e jogar em projeto</button>` : ""}
-          <button class="button ghost small" data-action="export-budget-pdf" data-budget-id="${budget.id}">↓ Exportar PDF</button>
+          <button class="button ghost small" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="interno">↓ PDF Interno</button>
+          <button class="button ghost small" data-action="export-budget-pdf" data-budget-id="${budget.id}" data-pdf-type="cliente">↓ PDF Cliente</button>
         </div>
       </article>
     `;
@@ -1021,19 +1023,14 @@ function renderFinancialHighlight(metrics) {
   `;
 }
 
-function exportBudgetPDF(budget) {
-  const client = getClientById(budget.clientId);
-  const margin = marginPercent(budget);
-  const profit = budget.price - budget.cost;
-  const tierLabel = margin < 20 ? "Crítica" : margin < 30 ? "Aceitável" : margin < 42 ? "Boa" : "Excelente";
+function exportBudgetPDF(budget, type) {
+  const client   = getClientById(budget.clientId);
+  const margin   = marginPercent(budget);
+  const profit   = budget.price - budget.cost;
   const tierColor = margin < 20 ? "#a85248" : margin < 30 ? "#b08540" : margin < 42 ? "#5fa870" : "#c4a44a";
-  const materialsRows = budget.materials.length
-    ? budget.materials.map((m) => `<tr><td>${escapeHtml(m.name||"")}</td><td>${escapeHtml(m.brand||"—")}</td><td>${escapeHtml(m.quantity||"—")}</td><td>${escapeHtml(m.note||"—")}</td></tr>`).join("")
-    : `<tr><td colspan="4" style="color:#888;font-style:italic">Nenhum material listado.</td></tr>`;
+  const today     = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 
-  const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/>
-<title>Orçamento – ${escapeHtml(budget.title)}</title>
-<style>
+  const baseStyles = `
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;padding:32px 40px}
   .logo{font-size:22px;font-weight:700;letter-spacing:.04em;color:#1a1a1a}
@@ -1041,64 +1038,112 @@ function exportBudgetPDF(budget) {
   .sub{font-size:11px;color:#888;margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
   hr{border:none;border-top:1px solid #e0e0e0;margin:18px 0}
   h2{font-size:18px;font-weight:700;margin-bottom:4px}
-  .meta{font-size:11px;color:#666;margin-bottom:16px}
-  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0}
+  .meta{font-size:12px;color:#555;margin-bottom:16px;line-height:1.7}
+  .grid{display:grid;gap:12px;margin:16px 0}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
   .card{padding:12px 14px;border:1px solid #e8e8e8;border-radius:8px;background:#fafafa}
   .card span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#999;margin-bottom:4px}
   .card strong{font-size:16px;font-weight:700;color:#1a1a1a}
-  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:${tierColor}22;color:${tierColor};border:1px solid ${tierColor}55}
-  .bar-wrap{height:6px;border-radius:3px;background:#e8e8e8;margin:8px 0 14px;overflow:hidden}
-  .bar-fill{height:100%;border-radius:3px;background:${tierColor};width:${Math.min((margin/60)*100,100).toFixed(1)}%}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:#f0f0f0;color:#555;border:1px solid #ddd}
   table{width:100%;border-collapse:collapse;margin-top:8px}
   th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#999;padding:6px 8px;border-bottom:2px solid #e8e8e8}
-  td{padding:8px 8px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#333}
-  .section-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#999;font-weight:600;margin:18px 0 8px}
+  td{padding:8px;border-bottom:1px solid #f0f0f0;font-size:12px;color:#333}
+  .section-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#999;font-weight:600;margin:20px 0 8px}
   .notes{padding:12px;background:#f9f9f9;border-radius:6px;font-size:12px;color:#444;line-height:1.6}
   .footer{margin-top:32px;padding-top:14px;border-top:1px solid #e8e8e8;font-size:10px;color:#bbb;display:flex;justify-content:space-between}
-  @media print{body{padding:20px 28px}@page{margin:12mm 14mm}}
-</style></head><body>
-<div style="display:flex;justify-content:space-between;align-items:flex-start">
-  <div>
-    <div class="logo">Efraim <span>Decore</span></div>
-    <div class="sub">Mobiliário planejado premium</div>
+  @media print{body{padding:20px 28px}@page{margin:12mm 14mm}}`;
+
+  const header = `
+  <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div>
+      <div class="logo">Efraim <span>Decore</span></div>
+      <div class="sub">Mobiliário planejado premium</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:11px;color:#888">Orçamento gerado em</div>
+      <div style="font-size:12px;font-weight:600">${today}</div>
+    </div>
   </div>
-  <div style="text-align:right">
-    <div style="font-size:11px;color:#888">Orçamento gerado em</div>
-    <div style="font-size:12px;font-weight:600">${new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"long",year:"numeric"})}</div>
-  </div>
-</div>
-<hr/>
-<h2>${escapeHtml(budget.title)}</h2>
-<div class="meta">
-  Cliente: <strong>${escapeHtml(client?.name || "—")}</strong>
-  ${client?.phone ? ` &nbsp;·&nbsp; ${escapeHtml(client.phone)}` : ""}
-  ${client?.address ? ` &nbsp;·&nbsp; ${escapeHtml(client.address)}` : ""}
-  &nbsp;·&nbsp; Status: <span class="pill">${escapeHtml(budget.status)}</span>
-</div>
-<div class="grid">
-  <div class="card"><span>Valor proposto</span><strong>${formatCurrency(budget.price)}</strong></div>
-  <div class="card"><span>Custo estimado</span><strong>${formatCurrency(budget.cost)}</strong></div>
-  <div class="card"><span>Lucro previsto</span><strong>${formatCurrency(profit)}</strong></div>
-  <div class="card"><span>Margem</span><strong>${formatPercent(margin)}</strong></div>
-  <div class="card"><span>Prazo</span><strong>${budget.businessDays} dias úteis</strong></div>
-  <div class="card"><span>Classificação</span><strong><span class="pill">${tierLabel}</span></strong></div>
-</div>
-<div class="bar-wrap"><div class="bar-fill"></div></div>
-${budget.description ? `<div class="section-title">Observações</div><div class="notes">${escapeHtml(budget.description)}</div>` : ""}
-<div class="section-title">Materiais previstos</div>
-<table>
-  <thead><tr><th>Material</th><th>Marca</th><th>Qtd.</th><th>Nota</th></tr></thead>
-  <tbody>${materialsRows}</tbody>
-</table>
-<div class="footer">
-  <span>Efraim Decore · Mobiliário Planejado Premium</span>
-  <span>Documento gerado pelo sistema interno</span>
-</div>
-<script>window.onload=()=>{window.print();}<\/script>
-</body></html>`;
+  <hr/>
+  <h2>${escapeHtml(budget.title)}</h2>`;
+
+  const clientInfo = `
+  <div class="meta">
+    <strong>${escapeHtml(client?.name || "—")}</strong><br/>
+    ${client?.phone ? escapeHtml(client.phone) + "<br/>" : ""}
+    ${client?.address ? escapeHtml(client.address) : ""}
+  </div>`;
+
+  let body = "";
+
+  if (type === "interno") {
+    const tierLabel = margin < 20 ? "Crítica" : margin < 30 ? "Aceitável" : margin < 42 ? "Boa" : "Excelente";
+    const barW = Math.min((margin / 60) * 100, 100).toFixed(1);
+    const matRows = budget.materials.length
+      ? budget.materials.map((m) => `<tr><td>${escapeHtml(m.name||"")}</td><td>${escapeHtml(m.brand||"—")}</td><td>${escapeHtml(m.quantity||"—")}</td><td>${escapeHtml(m.note||"—")}</td></tr>`).join("")
+      : `<tr><td colspan="4" style="color:#aaa;font-style:italic">Nenhum material listado.</td></tr>`;
+
+    body = `
+    ${header}
+    <div style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:600;background:${tierColor}22;color:${tierColor};border:1px solid ${tierColor}55;margin-bottom:12px">
+      Uso interno · Confidencial
+    </div>
+    ${clientInfo}
+    <div class="grid grid-3">
+      <div class="card"><span>Valor proposto</span><strong>${formatCurrency(budget.price)}</strong></div>
+      <div class="card"><span>Custo estimado</span><strong>${formatCurrency(budget.cost)}</strong></div>
+      <div class="card"><span>Lucro previsto</span><strong style="color:${tierColor}">${formatCurrency(profit)}</strong></div>
+      <div class="card"><span>Margem</span><strong style="color:${tierColor}">${formatPercent(margin)} · ${tierLabel}</strong></div>
+      <div class="card"><span>Prazo</span><strong>${budget.businessDays} dias úteis</strong></div>
+      <div class="card"><span>Status</span><strong>${escapeHtml(budget.status)}</strong></div>
+    </div>
+    <div style="height:8px;border-radius:4px;background:#e8e8e8;margin:4px 0 18px;overflow:hidden">
+      <div style="height:100%;border-radius:4px;background:${tierColor};width:${barW}%"></div>
+    </div>
+    ${budget.description ? `<div class="section-title">Observações internas</div><div class="notes">${escapeHtml(budget.description)}</div>` : ""}
+    <div class="section-title">Materiais previstos</div>
+    <table>
+      <thead><tr><th>Material</th><th>Marca</th><th>Qtd.</th><th>Nota</th></tr></thead>
+      <tbody>${matRows}</tbody>
+    </table>
+    <div class="footer">
+      <span>Efraim Decore · Documento Interno</span>
+      <span>Não compartilhar com o cliente</span>
+    </div>`;
+  } else {
+    const matRows = budget.materials.length
+      ? budget.materials.map((m) => `<tr><td>${escapeHtml(m.name||"")}</td><td>${escapeHtml(m.quantity||"—")}</td></tr>`).join("")
+      : `<tr><td colspan="2" style="color:#aaa;font-style:italic">A definir com o cliente.</td></tr>`;
+
+    body = `
+    ${header}
+    ${clientInfo}
+    <div class="grid grid-2">
+      <div class="card"><span>Valor total</span><strong>${formatCurrency(budget.price)}</strong></div>
+      <div class="card"><span>Prazo de execução</span><strong>${budget.businessDays} dias úteis</strong></div>
+    </div>
+    ${budget.description ? `<div class="section-title">Escopo do projeto</div><div class="notes">${escapeHtml(budget.description)}</div>` : ""}
+    <div class="section-title">Materiais inclusos</div>
+    <table>
+      <thead><tr><th>Item</th><th>Quantidade</th></tr></thead>
+      <tbody>${matRows}</tbody>
+    </table>
+    <div style="margin-top:24px;padding:14px 16px;border:1px solid #e8e8e8;border-radius:8px;background:#fafafa;font-size:12px;color:#555;line-height:1.7">
+      Este orçamento é válido por <strong>15 dias</strong> a partir da data de emissão.<br/>
+      Para aprovação, entre em contato pelo número informado.
+    </div>
+    <div class="footer">
+      <span>Efraim Decore · Mobiliário Planejado Premium</span>
+      <span>${today}</span>
+    </div>`;
+  }
 
   const win = window.open("", "_blank", "width=820,height=1100");
-  win.document.write(html);
+  win.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"/>
+<title>${type === "interno" ? "[INTERNO] " : ""}Orçamento – ${escapeHtml(budget.title)}</title>
+<style>${baseStyles}</style></head><body>${body}
+<script>window.onload=()=>{window.print();}<\/script></body></html>`);
   win.document.close();
 }
 
