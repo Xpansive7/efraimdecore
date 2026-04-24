@@ -160,6 +160,10 @@ const refs = {
   financeList: document.getElementById("finance-list")
 };
 
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").catch(() => {});
+}
+
 bindEvents();
 setupMotion();
 checkAuth();
