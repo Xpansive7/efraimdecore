@@ -124,6 +124,7 @@ defaultState.projects = [
 
 let state = { clients: [], budgets: [], projects: [] };
 let currentView = "dashboard";
+let saveFeedbackTimeout = null;
 
 const refs = {
   menuItems: [...document.querySelectorAll(".menu-item")],
@@ -288,7 +289,8 @@ function handleClientSubmit(event) {
     origin: String(formData.get("origin") || "").trim(),
     environment: String(formData.get("environment") || "").trim(),
     city: String(formData.get("city") || "").trim(),
-    notes: String(formData.get("notes") || "").trim()
+    notes: String(formData.get("notes") || "").trim(),
+    createdAt: todayISO()
   };
 
   if (![client.name, client.phone, client.address, client.origin, client.environment, client.city, client.notes].some((value) => String(value).trim())) {
@@ -314,7 +316,7 @@ function handleBudgetSubmit(event) {
     const name  = newClientName?.value.trim()  || "";
     const phone = newClientPhone?.value.trim() || "";
     if (name || phone) {
-      const newClient = { id: crypto.randomUUID(), name, phone, address: "", origin: "", environment: "", city: "", notes: "" };
+      const newClient = { id: crypto.randomUUID(), name, phone, address: "", origin: "", environment: "", city: "", notes: "", createdAt: todayISO() };
       state.clients.unshift(newClient);
       clientId = newClient.id;
     }
@@ -1540,7 +1542,7 @@ function sum(list, key) {
 function clientToRow(c) {
   return { id: c.id, name: c.name, phone: c.phone||"", address: c.address||"",
            origin: c.origin||"", environment: c.environment||"",
-           city: c.city||"", notes: c.notes||"", created_at: c.createdAt||today() };
+           city: c.city||"", notes: c.notes||"", created_at: c.createdAt||todayISO() };
 }
 function rowToClient(r) {
   return { id: r.id, name: r.name, phone: r.phone, address: r.address,
@@ -1551,7 +1553,7 @@ function budgetToRow(b) {
   return { id: b.id, client_id: b.clientId||null, title: b.title,
            status: b.status, price: b.price||0, cost: b.cost||0,
            business_days: b.businessDays||0, description: b.description||"",
-           materials: b.materials||[], created_at: b.createdAt||today() };
+           materials: b.materials||[], created_at: b.createdAt||todayISO() };
 }
 function rowToBudget(r) {
   return { id: r.id, clientId: r.client_id, title: r.title, status: r.status,
@@ -1562,9 +1564,9 @@ function rowToBudget(r) {
 function projectToRow(p) {
   return { id: p.id, client_id: p.clientId||null, source_budget_id: p.sourceBudgetId||null,
            title: p.title, status: p.status, price: p.price||0, cost: p.cost||0,
-           business_days: p.businessDays||0, start_date: p.startDate||today(),
+           business_days: p.businessDays||0, start_date: p.startDate||todayISO(),
            description: p.description||"", materials: p.materials||[],
-           created_at: p.createdAt||today() };
+           created_at: p.createdAt||todayISO() };
 }
 function rowToProject(r) {
   return { id: r.id, clientId: r.client_id, sourceBudgetId: r.source_budget_id,
@@ -1609,15 +1611,53 @@ function migrateFromLocalStorage() {
 
 // ── Persiste no Supabase (fire-and-forget) ───────────────────
 function saveState() {
-  syncToSupabase().catch(err => console.error("Sync falhou:", err));
+  showSaveFeedback("Salvando...", "pending");
+  syncToSupabase()
+    .then(() => showSaveFeedback("Salvo", "success"))
+    .catch(err => {
+      console.error("Sync falhou:", err);
+      showSaveFeedback("Erro ao salvar", "error");
+    });
 }
 
 async function syncToSupabase() {
   const ops = [];
-  if (state.clients.length)  ops.push(sb.from("clients").upsert(state.clients.map(clientToRow)));
-  if (state.budgets.length)  ops.push(sb.from("budgets").upsert(state.budgets.map(budgetToRow)));
-  if (state.projects.length) ops.push(sb.from("projects").upsert(state.projects.map(projectToRow)));
+  if (state.clients.length)  ops.push(runSupabaseWrite(sb.from("clients").upsert(state.clients.map(clientToRow)), "clientes"));
+  if (state.budgets.length)  ops.push(runSupabaseWrite(sb.from("budgets").upsert(state.budgets.map(budgetToRow)), "orcamentos"));
+  if (state.projects.length) ops.push(runSupabaseWrite(sb.from("projects").upsert(state.projects.map(projectToRow)), "projetos"));
   if (ops.length) await Promise.all(ops);
+}
+
+async function runSupabaseWrite(operation, label) {
+  const { error } = await operation;
+  if (error) {
+    throw new Error(`Falha ao salvar ${label}: ${error.message}`);
+  }
+}
+
+function showSaveFeedback(message, tone = "success") {
+  let el = document.getElementById("save-feedback");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "save-feedback";
+    el.className = "save-feedback";
+    el.hidden = true;
+    document.body.appendChild(el);
+  }
+
+  el.textContent = message;
+  el.className = `save-feedback ${tone}`;
+  el.hidden = false;
+
+  if (saveFeedbackTimeout) {
+    clearTimeout(saveFeedbackTimeout);
+  }
+
+  if (tone !== "pending") {
+    saveFeedbackTimeout = setTimeout(() => {
+      el.hidden = true;
+    }, 2200);
+  }
 }
 
 function showLoadingOverlay(show) {
