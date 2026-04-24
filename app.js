@@ -1662,16 +1662,20 @@ function rowToProject(r) {
 async function initApp() {
   showLoadingOverlay(true);
   try {
-    const [{ data: cls }, { data: bud }, { data: prj }] = await Promise.all([
+    const [r1, r2, r3] = await Promise.all([
       sb.from("clients").select("*").order("created_at"),
       sb.from("budgets").select("*").order("created_at"),
       sb.from("projects").select("*").order("created_at"),
     ]);
 
+    if (r1.error || r2.error || r3.error) {
+      throw new Error((r1.error || r2.error || r3.error).message);
+    }
+
     state = {
-      clients:  (cls||[]).map(rowToClient),
-      budgets:  (bud||[]).map(rowToBudget),
-      projects: (prj||[]).map(rowToProject),
+      clients:  (r1.data||[]).map(rowToClient),
+      budgets:  (r2.data||[]).map(rowToBudget),
+      projects: (r3.data||[]).map(rowToProject),
     };
     localStorage.removeItem(STORAGE_KEY);
   } catch (err) {
