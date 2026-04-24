@@ -164,6 +164,29 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js").catch(() => {});
 }
 
+let _installPrompt = null;
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  _installPrompt = e;
+  const btn = document.getElementById("btn-install");
+  if (btn) btn.style.display = "inline-flex";
+});
+window.addEventListener("appinstalled", () => {
+  const btn = document.getElementById("btn-install");
+  if (btn) btn.style.display = "none";
+  _installPrompt = null;
+});
+
+document.getElementById("btn-install")?.addEventListener("click", async () => {
+  if (!_installPrompt) return;
+  _installPrompt.prompt();
+  const { outcome } = await _installPrompt.userChoice;
+  if (outcome === "accepted") {
+    document.getElementById("btn-install").style.display = "none";
+    _installPrompt = null;
+  }
+});
+
 bindEvents();
 setupMotion();
 checkAuth();
