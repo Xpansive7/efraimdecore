@@ -467,21 +467,34 @@ async function deleteBudget(budgetId) {
     return;
   }
 
+  const linkedProjects = state.projects.filter((item) => item.sourceBudgetId === budgetId);
+  const previousProjects = [...state.projects];
+  showSaveFeedback("Excluindo proposta...", "pending");
   state.budgets = state.budgets.filter((item) => item.id !== budgetId);
+  state.projects = state.projects.filter((item) => item.sourceBudgetId !== budgetId);
   if (refs.projectSourceBudget?.value === budgetId) {
     refs.projectSourceBudget.value = "";
   }
   renderAll();
 
   try {
+    if (linkedProjects.length) {
+      const { error: linkedProjectsError } = await sb.from("projects").delete().eq("source_budget_id", budgetId);
+      if (linkedProjectsError) {
+        throw linkedProjectsError;
+      }
+    }
     const { error } = await sb.from("budgets").delete().eq("id", budgetId);
     if (error) {
       throw error;
     }
+    showSaveFeedback("Exclusao salva", "success");
   } catch (err) {
     console.error("Falha ao excluir proposta:", err);
     state.budgets.unshift(budget);
+    state.projects = previousProjects;
     renderAll();
+    showSaveFeedback("Erro ao excluir", "error");
   }
 }
 
@@ -494,10 +507,13 @@ async function deleteClient(clientId) {
   const previousClients = [...state.clients];
   const previousBudgets = [...state.budgets];
   const previousProjects = [...state.projects];
+  showSaveFeedback("Excluindo cliente...", "pending");
 
   state.clients = state.clients.filter((item) => item.id !== clientId);
   state.budgets = state.budgets.filter((item) => item.clientId !== clientId);
   state.projects = state.projects.filter((item) => item.clientId !== clientId);
+  if (refs.projectClientSelect?.value === clientId) refs.projectClientSelect.value = "";
+  if (refs.budgetClientSelect?.value === clientId) refs.budgetClientSelect.value = "";
   renderAll();
 
   try {
@@ -516,12 +532,14 @@ async function deleteClient(clientId) {
 
     const { error: clientError } = await sb.from("clients").delete().eq("id", clientId);
     if (clientError) throw clientError;
+    showSaveFeedback("Exclusao salva", "success");
   } catch (err) {
     console.error("Falha ao excluir cliente:", err);
     state.clients = previousClients;
     state.budgets = previousBudgets;
     state.projects = previousProjects;
     renderAll();
+    showSaveFeedback("Erro ao excluir", "error");
   }
 }
 
